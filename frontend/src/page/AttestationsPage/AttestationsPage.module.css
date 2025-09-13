@@ -1,0 +1,47 @@
+.align_top {
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.header {
+    margin-bottom: 50px;
+}
+
+.submenu {
+    display: flex;
+    flex-direction: row;
+    justify-items: flex-start;
+    align-items: flex-start;
+    width: 70%;
+    gap: 20px;
+}
+
+.width100 {
+    width: 100px;
+    text-align: center;
+}
+
+.width150 {
+    width: 150px;
+    text-align: center;
+}
+
+.hr {
+    width: 70%;
+}
+
+.row_menu{
+    display: flex;
+    flex-direction: row;
+    justify-items: flex-start;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.row {
+    display: flex;
+    flex-direction: row;
+    gap: 30px;
+    justify-content: center;
+    align-items: center;
+}

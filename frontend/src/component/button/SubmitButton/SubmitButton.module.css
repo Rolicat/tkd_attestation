@@ -1,0 +1,12 @@
+.button {
+    background-color: var(--main-button-color);
+    color: #FFFFFF;
+    width: 120px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.button:hover {
+    background-color: var(--main-button-color-hover);
+}

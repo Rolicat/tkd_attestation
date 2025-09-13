@@ -1,0 +1,21 @@
+.group_properties {
+    display: none;
+    position: absolute;
+    left: 90%;
+    top: 5%;
+    border: var(--border);
+    border-radius: var(--border-radius);
+    background-color: white;
+    padding: 20px;
+    width: 300px;
+    min-height: 200px;
+    z-index: 9999;
+}
+
+.row {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+}

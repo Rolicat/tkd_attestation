@@ -1,0 +1,21 @@
+.container {
+    display: flex;
+    flex-direction: row;
+    flex-direction: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.points {
+    width: 30px;
+    border: var(--border);
+    border-radius: var(--border-radius);
+    padding: 10px;
+}
+
+.name {
+    width: 100px;
+    border: var(--border);
+    border-radius: var(--border-radius);
+    padding: 10px;
+}

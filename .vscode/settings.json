@@ -1,0 +1,14 @@
+{
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit"
+    },
+    "editor.detectIndentation": false,
+    "[javascript]": {
+        "editor.tabSize": 2,
+        "prettier.tabWidth": 2
+    },
+    "[javascriptreact]": {
+        "editor.tabSize": 2,
+        "prettier.tabWidth": 2
+    }
+}

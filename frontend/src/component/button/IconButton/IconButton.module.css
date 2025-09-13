@@ -1,0 +1,20 @@
+.button {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--main-button-color);
+    color: white;
+    font-size: 12px;
+}
+
+.button:hover{
+    background-color: var(--main-button-color-hover);
+    cursor: pointer;
+}
+
+.icon {
+    width: 16px;
+    height: 16px;
+}
