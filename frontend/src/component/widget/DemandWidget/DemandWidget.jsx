@@ -3,7 +3,13 @@ import styles from './DemandWidget.module.css';
 
 
 const DemandWidget = ({ demand, setDemands, belt }) => {
-    const changeDemand = (row_id) => {
+    const changeDemand = (row_id, checked) => {
+        if (checked) {
+            postBeltDemandAPI(belt, row_id);
+        }
+        else {
+            removeBeltDemandAPI(belt, row_id);
+        }
         setDemands(prev => prev.map(cur_demand => {
             if (cur_demand.id !== demand.id) {
                 return cur_demand;
@@ -12,11 +18,6 @@ const DemandWidget = ({ demand, setDemands, belt }) => {
                     if (cur_row.id !== row_id) {
                         return cur_row;
                     } else {
-                        if (cur_row.used) {
-                            removeBeltDemandAPI(belt, cur_row.id);
-                        } else {
-                            postBeltDemandAPI(belt, cur_row.id);
-                        }
                         return {...cur_row, used: !cur_row.used};
                     }
                 })};
@@ -31,7 +32,7 @@ const DemandWidget = ({ demand, setDemands, belt }) => {
         </div>
         <div className={styles['demand_container']}>
           {demand.properties.map(row => <div key={row.id}>
-              <input type='checkbox' id={row.id} checked={row.used} onChange={() => changeDemand(row.id)} />
+              <input type='checkbox' id={row.id} checked={row.used} onChange={(e) => changeDemand(row.id, e.target.checked)} />
               <label htmlFor={row.id}> {row.name} </label>
             </div>
           )}

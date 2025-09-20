@@ -17,8 +17,11 @@ from api.serializers import (
     BeltDemandSerializer, AttestationSerializer,
     BeltDemandUsedSerializer, ComplexGroupTreeSerializer,
     GroupTreeSerializer, ParticipantGroupPropertiesSerializer,
-    ParticipantGroupSerializer, AttestationComplexSerializer
+    ParticipantGroupSerializer, AttestationComplexSerializer,
+    AttestationResultSerializer
 )
+
+from api.helpers import calc_attestation_points
 
 
 class BeltViewSet(viewsets.ModelViewSet):
@@ -236,6 +239,26 @@ class OptionViewSet(viewsets.ModelViewSet):
     queryset = Option.objects.all()
     serializer_class = OptionSerializer
 
+    @action(methods=('patch',), detail=False)
+    def save_by_name(self, request):
+        """ Сохраняет настройку по имени. """
+        name = request.data.get('name', None)
+        value = request.data.get('value', None)
+        if name is None or value is None:
+            return Response(
+                status=HTTPStatus.BAD_REQUEST
+            )
+        option = Option.objects.filter(name=name).first()
+        if option is None:
+            return Response(
+                status=HTTPStatus.BAD_REQUEST
+            )
+        option.value = value
+        option.save()
+        return Response(
+            status=HTTPStatus.OK
+        )
+
 
 class ComplexGroupViewSet(viewsets.ModelViewSet):
     """ API групп комплекса. """
@@ -358,6 +381,11 @@ class AttestationViewSet(viewsets.ModelViewSet):
             )
         # participant = Participant.objects.get(pk=participant_id)
         group = Group.objects.get(pk=group_id)
+        if group.status == 'Завершено':
+            return Response(
+                status=HTTPStatus.OK,
+                data=[]
+            )
         demand_complexes = set(BeltDemand.objects.filter(
             belt=group.belt_attestation
         ).all().values_list('complex', flat=True))
@@ -400,6 +428,13 @@ class AttestationViewSet(viewsets.ModelViewSet):
     def set_points(self, request):
         """ Устанавливаем баллы за комплекс. """
         participant_id = request.data.get('participant', None)
+        p_group = ParticipantGroup.objects.filter(
+            participant__id=participant_id
+        ).first()
+        if p_group is None or p_group.group.status != 'В процессе':
+            return Response(
+                status=HTTPStatus.BAD_REQUEST
+            )
         complex_id = request.data.get('complex', None)
         points = int(request.data.get('points', 0))
         if participant_id is None or complex_id is None:
@@ -448,6 +483,25 @@ class AttestationViewSet(viewsets.ModelViewSet):
         group.save()
         return Response(
             status=HTTPStatus.OK
+        )
+
+    @action(methods=('get',), detail=False)
+    def results(self, request):
+        """ Возвращает результаты подгруппы. """
+        group_id = request.GET.get('group_id', None)
+        option = Option.objects.filter(name='points_calc').first()
+        if group_id is None or option is None:
+            return Response(
+                status=HTTPStatus.BAD_REQUEST
+            )
+        data = calc_attestation_points(
+            group_id=group_id,
+            option=option
+        )
+        serializer = AttestationResultSerializer(instance=data, many=True)
+        return Response(
+            status=HTTPStatus.OK,
+            data=serializer.data
         )
 
 

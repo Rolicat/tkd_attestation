@@ -180,15 +180,9 @@ class Option(models.Model):
         blank=False,
         null=False
     )
-    user = models.ForeignKey(
-        to=User,
-        verbose_name='Пользователь',
-        help_text='Пользователь',
-        blank=True,
-        null=True,
-        on_delete=models.CASCADE,
-        related_name='options'
-    )
+
+    def __str__(self):
+        return f'{self.name}: {self.value}'
 
 
 class ComplexGroup(models.Model):
@@ -251,7 +245,7 @@ class BeltDemand(models.Model):
         help_text='Комплекс',
         blank=False,
         null=False,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
     )
 
     def __str__(self):

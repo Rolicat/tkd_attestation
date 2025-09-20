@@ -13,12 +13,12 @@ const BeltDemands = () => {
     const [selectedBelt, setSelectedBelt] = useState(1);
 
     useEffect(() => {
-        getBeltsAPI().then(data => data.result && setBelts(data.result));
-        getBeltDemandsAPI(1).then(data => data.result && setDemands(data.result));
+        getBeltsAPI().then(data => data.success && setBelts(data.result));
+        getBeltDemandsAPI(1).then(data => data.success && setDemands(data.result));
     }, []);
 
     useEffect(() => {
-        getBeltDemandsAPI(selectedBelt).then(data => data.result && setDemands(data.result));
+        getBeltDemandsAPI(selectedBelt).then(data => data.success && setDemands(data.result));
     }, [selectedBelt]);
 
     return (

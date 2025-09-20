@@ -9,7 +9,7 @@ import play_icon from '/play.png';
 import { changeGroupAPI, restartGroupAPI } from '../../api/api';
 
 
-const AttestationsRow = ({ record, setRecords }) => {
+const AttestationsRow = ({ record, setRecords, showResults }) => {
     const navigate = useNavigate();
 
     const restartAttestation = () => {
@@ -44,7 +44,7 @@ const AttestationsRow = ({ record, setRecords }) => {
               <IconButton icon={refresh_icon} onClick={() => restartAttestation()}/>
               <IconButton icon={play_icon} onClick={() => continueAttestation()}/>
             </div>}
-            {record.status == 'Завершено' && <IconButton icon={list_icon} />}
+            {record.status == 'Завершено' && <IconButton icon={list_icon} onClick={() => showResults(record.id)} />}
           </div>
           <div className={styles['width150']}>
               {record.name}

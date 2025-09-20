@@ -47,6 +47,11 @@ class AttestationAdmin(admin.ModelAdmin):
     ...
 
 
+class OptionAdmin(admin.ModelAdmin):
+    """ Админка опций. """
+    ...
+
+
 admin.site.register(Belt, BeltAdmin)
 admin.site.register(Participant, ParticipantAdmin)
 admin.site.register(Group, GroupAdmin)
@@ -55,3 +60,4 @@ admin.site.register(Complex, ComplexAdmin)
 admin.site.register(BeltDemand, BeltAdmin)
 admin.site.register(ParticipantGroup, ParticipantGroupAdmin)
 admin.site.register(Attestation, AttestationAdmin)
+admin.site.register(Option, OptionAdmin)

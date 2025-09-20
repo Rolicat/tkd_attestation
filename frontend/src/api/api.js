@@ -360,10 +360,35 @@ export async function completeGroupAPI(group_id) {
 }
 
 
+export async function getResultsAPI(group_id) {
+    const data = await getAPI(
+        'api/attestations/results/',
+        {params: {group_id: group_id}}
+    );
+    return data;
+}
+
+
 export async function registerUserAPI(name, password) {
     const data = await postAPI(
         'api/users/',
         { 'username': name, 'password': password }
+    );
+    return data;
+}
+
+
+export async function getUsersAPI() {
+    const data = await getAPI(
+      'api/users/'
+    );
+    return data;
+}
+
+
+export async function getProfileAPI() {
+    const data = await getAPI(
+      'api/users/me/'
     );
     return data;
 }
@@ -375,4 +400,21 @@ export async function getTokenAPI(name, password) {
       { 'username': name, 'password': password }
     );
     return data;
+}
+
+
+export async function getOptionsAPI() {
+    const data = await getAPI(
+        'api/options/'
+    );
+    return data;
+}
+
+
+export async function postOptionsAPI(name, value) {
+    const data = await patchAPI(
+        'api/options/save_by_name/',
+        {'name': name, 'value': value}
+    );
+    return data;  
 }

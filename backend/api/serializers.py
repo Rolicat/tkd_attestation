@@ -139,3 +139,9 @@ class AttestationComplexSerializer(serializers.Serializer):
     name = serializers.CharField()
     points = serializers.IntegerField()
     max = serializers.IntegerField()
+
+
+class AttestationResultSerializer(serializers.Serializer):
+    """ Сериализатор итогов аттестации. """
+    id = serializers.IntegerField()
+    value = serializers.CharField()

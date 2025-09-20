@@ -12,6 +12,7 @@ import OptionsPage from './page/OptionsPage/OptionsPage';
 import AttestationsPage from './page/AttestationsPage/AttestationsPage';
 import ComplexesPage from './page/ComplexesPage/ComplexesPage';
 import BeltDemands from './page/BeltDemands/BeltDemands';
+import ProgramOptionsPage from './page/ProgramOptionsPage/ProgramOptionsPage';
 import AttestationsGroupPage from './page/AttestationsGroupPage/AttestationsGroupPage';
 
 
@@ -48,6 +49,10 @@ const router = createBrowserRouter(
       {
         path: 'belt_demands/',
         element: <BeltDemands />
+      },
+      {
+        path: 'program_options/',
+        element: <ProgramOptionsPage />
       },
       {
         path: 'auth/',
