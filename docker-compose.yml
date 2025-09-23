@@ -1,0 +1,33 @@
+volumes:
+  pg_data:
+  static:
+
+services:
+  db:
+    image: postgres:16.9
+    restart: always
+    env_file: ./backend/.env
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+  backend:
+    build: ./backend/
+    restart: always
+    env_file: ./backend/.env
+    tty: true
+    volumes:
+      - static:/backend_static
+    depends_on:
+      - db
+  frontend:
+    build: ./frontend/
+    volumes:
+      - static:/frontend_static
+    command: cp -r ./dist/. /frontend_static/
+  gateway:
+    build: ./gateway/
+    volumes:
+      - static:/staticfiles/
+    depends_on:
+      - backend
+    ports:
+      - 80:80

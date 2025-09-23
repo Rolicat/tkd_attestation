@@ -178,7 +178,8 @@ class Option(models.Model):
         help_text='Значение',
         max_length=100,
         blank=False,
-        null=False
+        null=False,
+        default=''
     )
 
     def __str__(self):

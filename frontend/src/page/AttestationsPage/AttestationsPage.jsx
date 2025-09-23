@@ -15,6 +15,8 @@ const AttestationsPage = () => {
 
     useEffect(() => {
         getGroupsAPI().then(data => data.success && setGroups(data.result));
+        const timerId = setInterval(() => getGroupsAPI().then(data => data.success && setGroups(data.result)), 3000);
+        return () => clearInterval(timerId);
     }, []);
 
     const viewGroupResults = (group_id) => {
