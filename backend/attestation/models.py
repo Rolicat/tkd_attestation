@@ -125,6 +125,11 @@ class Group(models.Model):
         max_length=30,
         blank=False,
         null=False,
+        choices=(
+            ('Ожидание', 'Ожидание'),
+            ('В процессе', 'В процессе'),
+            ('Завершено', 'Завершено')
+        ),
         default='Ожидание'
     )
 
@@ -230,6 +235,131 @@ class Complex(models.Model):
         return f'{self.name}. Макс. баллы: {self.points}'
 
 
+class PhysicalTest(models.Model):
+    """ Справочник физических комплексов. """
+    name = models.CharField(
+        verbose_name='Наименование',
+        help_text='Наименование',
+        max_length=100,
+        blank=False,
+        null=False
+    )
+
+    def __str__(self):
+        return self.name
+
+
+class PhysicalTestPoint(models.Model):
+    """ Справочник баллов и процентов. """
+    percent = models.SmallIntegerField(
+        verbose_name='Процент',
+        help_text='Процент',
+        blank=False,
+        null=False,
+        default=0
+    )
+    points = models.SmallIntegerField(
+        verbose_name='Балл',
+        help_text='Балл',
+        blank=False,
+        null=False,
+        default=0
+    )
+
+    def __str__(self):
+        return f'{self.points} - {self.percent}'
+
+
+class PhysicalTestDemand(models.Model):
+    """ Справочник требований физических комплексов. """
+    test = models.ForeignKey(
+        to=PhysicalTest,
+        verbose_name='Физический комплекс',
+        help_text='Физический комплекс',
+        blank=False,
+        null=False,
+        on_delete=models.CASCADE
+    )
+    criteria = models.SmallIntegerField(
+        verbose_name='Критерий',
+        help_text='Критерий',
+        blank=False,
+        null=False,
+        default=0
+    )
+    belt = models.ForeignKey(
+        to=Belt,
+        verbose_name='Пояс',
+        help_text='Пояс',
+        blank=False,
+        null=False,
+        on_delete=models.CASCADE
+    )
+
+
+class AdditionalTest(models.Model):
+    """ Дополнительные аттестационные тесты. """
+    name = models.CharField(
+        verbose_name='Наименование',
+        help_text='Наименование',
+        max_length=100,
+        blank=False,
+        null=False
+    )
+
+    def __str__(self):
+        return self.name
+
+
+class AdditionalTestCriteria(models.Model):
+    """ Критерии дополнительных аттестационных тестов. """
+    name = models.CharField(
+        verbose_name='Наименование',
+        help_text='Наименование',
+        max_length=100,
+        blank=False,
+        null=False
+    )
+    points = models.SmallIntegerField(
+        verbose_name='Балл',
+        help_text='Балл',
+        blank=False,
+        null=False,
+        default=0
+    )
+    additional_test = models.ForeignKey(
+        to=AdditionalTest,
+        verbose_name='Дополнительный тест',
+        help_text='Дополнительный тест',
+        blank=False,
+        null=False,
+        on_delete=models.CASCADE,
+        related_name='criterias'
+    )
+
+    def __str__(self):
+        return f'{self.name}. Макс. баллы: {self.points}'
+
+
+class AdditionalTestDemand(models.Model):
+    criteria = models.ForeignKey(
+        to=AdditionalTestCriteria,
+        verbose_name='Критерий',
+        help_text='Критерий',
+        blank=False,
+        null=False,
+        on_delete=models.CASCADE
+    )
+    belt = models.ForeignKey(
+        to=Belt,
+        verbose_name='Пояс',
+        help_text='Пояс',
+        blank=False,
+        null=False,
+        on_delete=models.CASCADE
+    )
+
+
 class BeltDemand(models.Model):
     """ Справочник требований к поясам. """
     belt = models.ForeignKey(
@@ -273,7 +403,7 @@ class Attestation(models.Model):
         on_delete=models.CASCADE,
         related_name='attestations'
     )
-    points = models.SmallIntegerField(
+    points = models.FloatField(
         verbose_name='Балл',
         help_text='Балл',
         blank=False,
@@ -293,4 +423,74 @@ class Attestation(models.Model):
             f'{self.participant} ('
             f'{self.complex} {self.points} '
             f'{self.judge})'
+        )
+
+
+class PhysicalAttestation(models.Model):
+    """ Данные по аттестации физических упражнений участников. """
+    participant = models.ForeignKey(
+        to=Participant,
+        verbose_name='Участник',
+        help_text='Участник',
+        blank=False,
+        null=False,
+        on_delete=models.CASCADE,
+        related_name='physical_attestations'
+    )
+    test = models.ForeignKey(
+        to=PhysicalTest,
+        verbose_name='Комплекс',
+        help_text='Комплекс',
+        blank=False,
+        null=False,
+        on_delete=models.CASCADE,
+        related_name='physical_attestations'
+    )
+    points = models.SmallIntegerField(
+        verbose_name='Балл',
+        help_text='Балл',
+        blank=False,
+        null=False
+    )
+
+    def __str__(self):
+        return (
+            f'{self.participant} ('
+            f'{self.complex} {self.points}'
+        )
+
+
+class AdditionalAttestation(models.Model):
+    """ Данные по аттестации дополнительных упражнений участников. """
+    participant = models.ForeignKey(
+        to=Participant,
+        verbose_name='Участник',
+        help_text='Участник',
+        blank=False,
+        null=False,
+        on_delete=models.CASCADE,
+        related_name='additional_attestations'
+    )
+    complex = models.ForeignKey(
+        to=AdditionalTest,
+        verbose_name='Комплекс',
+        help_text='Комплекс',
+        blank=False,
+        null=False,
+        on_delete=models.CASCADE,
+        related_name='additional_attestations'
+    )
+    criteria = models.ForeignKey(
+        to=AdditionalTestCriteria,
+        verbose_name='Выполненный критерий',
+        help_text='Выполненный критерий',
+        blank=False,
+        null=False,
+        on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return (
+            f'{self.participant} ('
+            f'{self.complex} {self.criteria}'
         )

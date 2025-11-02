@@ -1,0 +1,17 @@
+.align_top {
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.header {
+    margin-bottom: 100px;
+}
+
+.submenu {
+    display: flex;
+    flex-direction: row;
+    justify-items: flex-start;
+    align-items: flex-start;
+    width: 70%;
+    gap: 20px;
+}

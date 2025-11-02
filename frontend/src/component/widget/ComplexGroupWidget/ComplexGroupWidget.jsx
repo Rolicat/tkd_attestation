@@ -3,7 +3,10 @@ import plus_icon from '/plus.png';
 import trash_icon from '/trash.png';
 import edit_icon from '/edit.png';
 import confirm_icon from '/confirm.png';
+import triangle_down from '/triangle_down.png';
+import triangle_right from '/triangle_right.png';
 import IconButton from '../../button/IconButton/IconButton';
+import IconButtonNoBG from '../../button/IconButtonNoBG/IconButtonNoBG';
 import ComplexWidget from '../ComplexWidget/ComplexWidget';
 import { useState } from 'react';
 import { changeComplexAPI, changeComplexGroupAPI, deleteComplexAPI, deleteComplexGroupAPI, postComplexAPI } from '../../../api/api';
@@ -12,6 +15,7 @@ import { changeComplexAPI, changeComplexGroupAPI, deleteComplexAPI, deleteComple
 const ComplexGroupWidget = ({ group, setComplexes }) => {
     const [editMode, setEditMode] = useState(false);
     const [groupName, setGroupName] = useState(group.name);
+    const [showProperties, setShowProperties] = useState(false);
 
     const deleteComplex = (complex_id) => {
         deleteComplexAPI(complex_id).then(data => {
@@ -53,6 +57,7 @@ const ComplexGroupWidget = ({ group, setComplexes }) => {
     };
 
     const addComplex = () => {
+        setShowProperties(true);
         postComplexAPI(group.id).then(data => data.success && setComplexes(prev => prev.map(cur_group => {
                 if (group.id != cur_group.id) {
                     return cur_group;
@@ -97,6 +102,8 @@ const ComplexGroupWidget = ({ group, setComplexes }) => {
     return (
       <div className={styles['container']}>
         <div className={styles['header']}>
+          {!editMode && showProperties && <IconButtonNoBG icon={triangle_down} onClick={() => setShowProperties(false)} />}
+          {!editMode && !showProperties && <IconButtonNoBG icon={triangle_right} onClick={() => setShowProperties(true)} />}
           {!editMode && groupName}
           {editMode && <input className={styles['name']} type='text' value={groupName} onChange={e=> setGroupName(e.target.value)} />}
           <IconButton icon={plus_icon} onClick={() => addComplex()} />
@@ -104,9 +111,9 @@ const ComplexGroupWidget = ({ group, setComplexes }) => {
           {editMode && <IconButton icon={confirm_icon} onClick={() => {setEditMode(false); changeGroup();}} />}
           <IconButton icon={trash_icon} onClick={() => deleteGroup()} />
         </div>
-        <div className={styles['complex_container']}>
+        {showProperties && <div className={styles['complex_container']}>
           {group.properties.map(complex => <ComplexWidget key={complex.id} complex={complex} deleteComplex={deleteComplex} changeComplex={changeComplex} />)}
-        </div>
+        </div>}
       </div>
     );
 };

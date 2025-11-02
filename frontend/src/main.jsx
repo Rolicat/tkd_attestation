@@ -14,6 +14,9 @@ import ComplexesPage from './page/ComplexesPage/ComplexesPage';
 import BeltDemands from './page/BeltDemands/BeltDemands';
 import ProgramOptionsPage from './page/ProgramOptionsPage/ProgramOptionsPage';
 import AttestationsGroupPage from './page/AttestationsGroupPage/AttestationsGroupPage';
+import PhysicalTestPage from './page/PhysicalTestPage/PhysicalTestPage';
+import AdditionalTestPage from './page/AdditionalTestPage/AdditionalTestPage';
+import PhysicalAttestationPage from './page/PhysicalAttestationPage/PhysicalAttestationPage';
 
 
 const router = createBrowserRouter(
@@ -29,6 +32,10 @@ const router = createBrowserRouter(
       {
         path: 'attestation/:groupId',
         element: <AttestationsGroupPage />
+      },
+      {
+        path: 'physical_attestation/:groupId',
+        element: <PhysicalAttestationPage />
       },
       {
         path: 'participants/',
@@ -53,6 +60,14 @@ const router = createBrowserRouter(
       {
         path: 'program_options/',
         element: <ProgramOptionsPage />
+      },
+      {
+        path: 'physical_tests/',
+        element: <PhysicalTestPage />
+      },
+      {
+        path: 'additional_tests/',
+        element: <AdditionalTestPage />
       },
       {
         path: 'auth/',

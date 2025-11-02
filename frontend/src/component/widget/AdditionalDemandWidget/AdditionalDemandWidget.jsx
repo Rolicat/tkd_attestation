@@ -1,22 +1,22 @@
-import { postBeltDemandAPI, removeBeltDemandAPI } from '../../../api/api';
+import { postAdditionalTestDemandAPI, removeAdditionalTestDemandAPI } from '../../../api/api';
 import { useState } from 'react';
-import styles from './DemandWidget.module.css';
+import styles from './AdditionalDemandWidget.module.css';
 import triangle_down from '/triangle_down.png';
 import triangle_right from '/triangle_right.png';
 import IconButtonNoBG from '../../button/IconButtonNoBG/IconButtonNoBG';
 
 
-const DemandWidget = ({ demand, setDemands, belt }) => {
+const AdditionalDemandWidget = ({ demand, setAdditionalDemands, belt }) => {
     const [showProperties, setShowProperties] = useState(false);
 
-    const changeDemand = (row_id, checked) => {
+    const changeAdditionalTest = (row_id, checked) => {
         if (checked) {
-            postBeltDemandAPI(belt, row_id);
+            postAdditionalTestDemandAPI(belt, row_id);
         }
         else {
-            removeBeltDemandAPI(belt, row_id);
+            removeAdditionalTestDemandAPI(belt, row_id);
         }
-        setDemands(prev => prev.map(cur_demand => {
+        setAdditionalDemands(prev => prev.map(cur_demand => {
             if (cur_demand.id !== demand.id) {
                 return cur_demand;
             } else {
@@ -40,7 +40,7 @@ const DemandWidget = ({ demand, setDemands, belt }) => {
         </div>
         {showProperties && <div className={styles['demand_container']}>
           {demand.properties.map(row => <div key={row.id}>
-              <input type='checkbox' id={row.id} checked={row.used} onChange={(e) => changeDemand(row.id, e.target.checked)} />
+              <input type='checkbox' id={row.id} checked={row.used} onChange={(e) => changeAdditionalTest(row.id, e.target.checked)} />
               <label htmlFor={row.id}> {row.name} </label>
             </div>
           )}
@@ -50,4 +50,4 @@ const DemandWidget = ({ demand, setDemands, belt }) => {
 };
 
 
-export default DemandWidget;
+export default AdditionalDemandWidget;

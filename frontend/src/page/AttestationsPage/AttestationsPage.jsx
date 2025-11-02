@@ -45,7 +45,7 @@ const AttestationsPage = () => {
             Аттестация
           </div>
           <div className={styles['row']}>
-            <div className={styles['width100']}></div>
+            <div className={styles['width200']}></div>
             <div className={styles['width150']}> Подгруппа </div>
             <div className={styles['width150']}> Результат </div>
           </div>

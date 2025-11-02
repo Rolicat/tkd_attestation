@@ -3,11 +3,16 @@ from http import HTTPStatus
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from attestation.models import (
     Belt, Participant, Group, Option,
     ComplexGroup, Complex, BeltDemand,
-    Attestation, ParticipantGroup
+    Attestation, ParticipantGroup,
+    PhysicalTest, AdditionalTest,
+    AdditionalTestCriteria, AdditionalTestDemand,
+    PhysicalTestDemand, PhysicalTestPoint,
+    PhysicalAttestation
 )
 
 from api.serializers import (
@@ -18,7 +23,12 @@ from api.serializers import (
     BeltDemandUsedSerializer, ComplexGroupTreeSerializer,
     GroupTreeSerializer, ParticipantGroupPropertiesSerializer,
     ParticipantGroupSerializer, AttestationComplexSerializer,
-    AttestationResultSerializer
+    AttestationResultSerializer, PhysicalTestSerializer,
+    AdditionalTestSerializer, AdditionalTestCriteriaSerializer,
+    TestTreeSerializer, AdditionalTestDemandUsedSerializer,
+    AdditionalTestDemandSerializer, PhysicalTestDemandSerializer,
+    PhysicalTestPointSerializer, PhysicalAttestationSerializer,
+    DemandsByGroupAndTestSerializer
 )
 
 from api.helpers import calc_attestation_points
@@ -238,6 +248,7 @@ class OptionViewSet(viewsets.ModelViewSet):
     """ API справочника настроек пользователя. """
     queryset = Option.objects.all()
     serializer_class = OptionSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly, )
 
     @action(methods=('patch',), detail=False)
     def save_by_name(self, request):
@@ -262,8 +273,36 @@ class OptionViewSet(viewsets.ModelViewSet):
 
 class ComplexGroupViewSet(viewsets.ModelViewSet):
     """ API групп комплекса. """
-    queryset = ComplexGroup.objects.all().order_by('name')
+    queryset = ComplexGroup.objects.all().order_by('id')
     serializer_class = ComplexGroupSerializer
+
+    @action(methods=('post',), detail=False)
+    def complexes(self, request):
+        """ Получить комплексы группы. """
+        group_id = request.data.get('group_id', None)
+        complexGroup_id = request.data.get('complexGroup_id', None)
+        if group_id is None or complexGroup_id is None:
+            return Response(
+                status=HTTPStatus.BAD_REQUEST
+            )
+        group = Group.objects.get(pk=group_id)
+        belt = group.belt_attestation
+        complexGroup = ComplexGroup.objects.get(pk=complexGroup_id)
+        belt_demands = BeltDemand.objects.filter(
+            belt=belt,
+            complex__in=complexGroup.complexes.all(),
+        ).all()
+        complexes = []
+        for bd in belt_demands:
+            complexes.append(bd.complex)
+        serializer = ComplexSerializer(
+            instance=complexes,
+            many=True
+        )
+        return Response(
+            status=HTTPStatus.OK,
+            data=serializer.data
+        )
 
 
 class ComplexViewSet(viewsets.ModelViewSet):
@@ -366,6 +405,84 @@ class AttestationViewSet(viewsets.ModelViewSet):
     serializer_class = AttestationSerializer
 
     @action(methods=('get',), detail=False)
+    def complex_point(self, request):
+        """ Возвращает текущие баллы за комплекс. """
+        participant_id = request.GET.get('participant', None)
+        complex_id = request.GET.get('complex_id', None)
+        group_id = request.GET.get('group_id', None)
+        if (
+            participant_id is None or
+            complex_id is None or
+            group_id is None
+        ):
+            return Response(
+                status=HTTPStatus.BAD_REQUEST
+            )
+        judge = request.user
+        complex = Complex.objects.get(pk=complex_id)
+        attestation = Attestation.objects.filter(
+            participant=participant_id,
+            complex=complex_id,
+            judge=judge
+        ).first()
+        if attestation is None:
+            data = {
+                'id': complex.id,
+                'name': complex.name,
+                'points': 0,
+                'max': complex.points
+            }
+        else:
+            data = {
+                'id': complex.id,
+                'name': complex.name,
+                'points': attestation.points,
+                'max': complex.points
+            }
+        serializer = AttestationComplexSerializer(instance=data)
+        return Response(
+            status=HTTPStatus.OK,
+            data=serializer.data
+        )
+
+    @action(methods=('get',), detail=False)
+    def physical_test_point(self, request):
+        """ Возвращает текущие баллы за физический комплекс. """
+        participant_id = request.GET.get('participant_id', None)
+        test_id = request.GET.get('test_id', None)
+        if (
+            participant_id is None or
+            test_id is None
+        ):
+            return Response(
+                status=HTTPStatus.BAD_REQUEST
+            )
+        test = PhysicalTest.objects.get(pk=test_id)
+        physical_attestation = PhysicalAttestation.objects.filter(
+            participant=participant_id,
+            test=test_id
+        ).first()
+        if physical_attestation is None:
+            data = {
+                'id': test.id,
+                'name': test.name,
+                'points': 0,
+                'max': 9999
+            }
+        else:
+            data = {
+                'id': test.id,
+                'name': test.name,
+                'points': physical_attestation.points,
+                'max': 9999
+            }
+        serializer = PhysicalAttestationSerializer(instance=data)
+        return Response(
+            status=HTTPStatus.OK,
+            data=serializer.data
+        )
+
+    @action(methods=('get',), detail=False)
     def change_complex_group(self, request):
         """ Возвращает список комплексов и выставленных баллов. """
         participant_id = request.GET.get('participant', None)
@@ -436,7 +553,7 @@ class AttestationViewSet(viewsets.ModelViewSet):
                 status=HTTPStatus.BAD_REQUEST
             )
         complex_id = request.data.get('complex', None)
-        points = int(request.data.get('points', 0))
+        points = float(request.data.get('points', 0))
         if participant_id is None or complex_id is None:
             return Response(
                 status=HTTPStatus.BAD_REQUEST
@@ -446,6 +563,32 @@ class AttestationViewSet(viewsets.ModelViewSet):
             participant_id=participant_id,
             complex_id=complex_id,
             judge=judge,
+            defaults={'points': points}
+        )
+        return Response(
+            status=HTTPStatus.OK
+        )
+
+    @action(methods=('post',), detail=False)
+    def set_physical_test_points(self, request):
+        """ Устанавливаем баллы за физический комплекс. """
+        participant_id = request.data.get('participant_id', None)
+        p_group = ParticipantGroup.objects.filter(
+            participant__id=participant_id
+        ).first()
+        if p_group is None or p_group.group.status != 'В процессе':
+            return Response(
+                status=HTTPStatus.BAD_REQUEST
+            )
+        test_id = request.data.get('test_id', None)
+        points = float(request.data.get('points', 0))
+        if participant_id is None or test_id is None:
+            return Response(
+                status=HTTPStatus.BAD_REQUEST
+            )
+        PhysicalAttestation.objects.update_or_create(
+            participant_id=participant_id,
+            test_id=test_id,
             defaults={'points': points}
         )
         return Response(
@@ -509,3 +652,245 @@ class ParticipantGroupViewSet(viewsets.ModelViewSet):
     """ API состава групп. """
     queryset = ParticipantGroup.objects.all().order_by('order')
     serializer_class = ParticipantGroupSerializer
+
+
+class PhysicalTestViewSet(viewsets.ModelViewSet):
+    """ API физических комплексов. """
+    queryset = PhysicalTest.objects.all()
+    serializer_class = PhysicalTestSerializer
+
+    @action(methods=('post',), detail=False)
+    def tests(self, request):
+        """ Получить физические комплексы группы. """
+        group_id = request.data.get('group_id', None)
+        if group_id is None:
+            return Response(
+                status=HTTPStatus.BAD_REQUEST
+            )
+        group = Group.objects.get(pk=group_id)
+        belt = group.belt_attestation
+        belt_demands = PhysicalTestDemand.objects.filter(
+            belt=belt
+        ).all()
+        tests = []
+        for pbd in belt_demands:
+            tests.append(pbd.test)
+        serializer = PhysicalTestSerializer(
+            instance=tests,
+            many=True
+        )
+        return Response(
+            status=HTTPStatus.OK,
+            data=serializer.data
+        )
+
+
+class AdditionalTestViewSet(viewsets.ModelViewSet):
+    """ API дополнительных комплексов. """
+    queryset = AdditionalTest.objects.all()
+    serializer_class = AdditionalTestSerializer
+
+
+class AdditionalTestCriteriaViewSet(viewsets.ModelViewSet):
+    """ API критериев дополнительных комплексов. """
+    queryset = AdditionalTestCriteria.objects.all()
+    serializer_class = AdditionalTestCriteriaSerializer
+
+    @action(methods=('get',), detail=False)
+    def criteria_tree(self, request):
+        """ Дерево комплексов с группами. """
+        data = []
+        tests = AdditionalTest.objects.all()
+        for test in tests:
+            criterias = []
+            for criteria in test.criterias.all():
+                criteria_info = {
+                    'id': criteria.id,
+                    'name': criteria.name,
+                    'points': criteria.points
+                }
+                criterias.append(criteria_info)
+            data.append(
+                {
+                    'id': test.id,
+                    'name': test.name,
+                    'properties': criterias
+                }
+            )
+        serializer = TestTreeSerializer(instance=data, many=True)
+        return Response(
+            status=HTTPStatus.OK,
+            data=serializer.data
+        )
+
+
+class AdditionalTestDemandViewSet(viewsets.ModelViewSet):
+    """ API требований дополнительных комплексов. """
+    queryset = AdditionalTestDemand.objects.all()
+    serializer_class = AdditionalTestDemandSerializer
+
+    @action(methods=('get',), detail=False)
+    def used_demands(self, request):
+        """ Дерево требований к поясам с отметкой использования. """
+        belt_pk = request.GET.get('belt_id')
+        data = []
+        tests = AdditionalTest.objects.all()
+        for test in tests:
+            criterias = []
+            for criteria in test.criterias.all():
+                criteria_info = {
+                    'id': criteria.id,
+                    'name': criteria.name
+                }
+                demands = AdditionalTestDemand.objects.filter(
+                    belt=belt_pk,
+                    criteria=criteria
+                )
+                criteria_info['used'] = True if demands.exists() else False
+                criterias.append(criteria_info)
+            data.append(
+                {
+                    'id': test.id,
+                    'name': test.name,
+                    'properties': criterias
+                }
+            )
+        serializer = AdditionalTestDemandUsedSerializer(
+            instance=data, many=True
+        )
+        return Response(
+            status=HTTPStatus.OK,
+            data=serializer.data
+        )
+
+    @action(methods=('delete',), detail=False)
+    def remove_criteria(self, request):
+        """ Удаляет требования дополнительного теста к поясу. """
+        belt_pk = request.GET.get('belt_id')
+        criteria_pk = request.GET.get('criteria_id')
+        if belt_pk is None or criteria_pk is None:
+            return Response(
+                status=HTTPStatus.BAD_REQUEST,
+                data='belt or criteria not found'
+            )
+        belt_demand = AdditionalTestDemand.objects.filter(
+            belt=belt_pk, criteria=criteria_pk
+        )
+        if not belt_demand.exists():
+            return Response(
+                status=HTTPStatus.BAD_REQUEST,
+                data='belt demand not found'
+            )
+        belt_demand.delete()
+        return Response(
+            status=HTTPStatus.OK,
+        )
+
+
+class PhysicalTestDemandViewSet(viewsets.ModelViewSet):
+    """ API требований физических комплексов. """
+    queryset = PhysicalTestDemand.objects.all()
+    serializer_class = PhysicalTestDemandSerializer
+
+    @action(methods=('get',), detail=False)
+    def belt_demands(self, request):
+        """ Требования по поясу. """
+        belt_pk = request.GET.get('belt_id', None)
+        if belt_pk is None:
+            return Response(
+                status=HTTPStatus.BAD_REQUEST
+            )
+        belt = Belt.objects.get(pk=belt_pk)
+        tests = PhysicalTest.objects.all()
+        results = []
+        for test in tests:
+            demand = PhysicalTestDemand.objects.filter(
+                belt=belt_pk,
+                test=test
+            ).first()
+            result = {}
+            result['test'] = {
+                'id': test.id,
+                'name': test.name,
+            }
+            result['belt'] = belt
+            if demand is None:
+                result['criteria'] = 0
+            else:
+                result['criteria'] = demand.criteria
+            results.append(result)
+        serializer = PhysicalTestDemandSerializer(instance=results, many=True)
+        return Response(
+            status=HTTPStatus.OK,
+            data=serializer.data
+        )
+
+    @action(methods=('post',), detail=False)
+    def save_criteria(self, request):
+        """ Сохранить  критерии. """
+        test_pk = request.data.get('test_id', None)
+        belt_pk = request.data.get('belt_id', None)
+        criteria = request.data.get('criteria', None)
+        if test_pk is None or belt_pk is None or criteria is None:
+            return Response(
+                status=HTTPStatus.BAD_REQUEST
+            )
+        test = PhysicalTest.objects.get(pk=test_pk)
+        belt = Belt.objects.get(pk=belt_pk)
+        ptd = PhysicalTestDemand.objects.filter(
+            test=test,
+            belt=belt
+        ).first()
+        if ptd is None:
+            ptd = PhysicalTestDemand(test=test, belt=belt)
+        ptd.criteria = criteria
+        ptd.save()
+        return Response(
+            status=HTTPStatus.OK
+        )
+
+    @action(methods=('get',), detail=False)
+    def demands_by_group_test(self, request):
+        """ Требования по поясу и виду комплекса. """
+        group_id = request.GET.get('group_id', None)
+        test_id = request.GET.get('test_id', None)
+        if group_id is None or test_id is None:
+            return Response(
+                status=HTTPStatus.BAD_REQUEST
+            )
+        group = Group.objects.get(pk=group_id)
+        belt = group.belt_attestation
+        ptd = PhysicalTestDemand.objects.filter(
+            test_id=test_id,
+            belt=belt
+        ).first()
+        if ptd is None:
+            return Response(
+                status=HTTPStatus.BAD_REQUEST
+            )
+        criteria = ptd.criteria
+        percents_and_points = PhysicalTestPoint.objects.order_by(
+            '-points'
+        ).all()
+        results = []
+        for _ in percents_and_points:
+            results.append(
+                {
+                    'points': _.points,
+                    'criteria': round(criteria*_.percent/100, 0)
+                }
+            )
+        serializer = DemandsByGroupAndTestSerializer(
+            instance=results,
+            many=True
+        )
+        return Response(
+            status=HTTPStatus.OK,
+            data=serializer.data
+        )
+
+
+class PhysicalTestPointViewSet(viewsets.ModelViewSet):
+    """ API критериев процентажа для физических тестов. """
+    queryset = PhysicalTestPoint.objects.order_by('points').all()
+    serializer_class = PhysicalTestPointSerializer

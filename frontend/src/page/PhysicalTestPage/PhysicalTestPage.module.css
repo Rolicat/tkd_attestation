@@ -1,0 +1,57 @@
+.align_top {
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.header {
+    margin-bottom: 100px;
+}
+
+.submenu {
+    display: flex;
+    flex-direction: row;
+    justify-items: flex-start;
+    align-items: flex-start;
+    width: 70%;
+    gap: 20px;
+}
+
+.row_menu{
+    display: flex;
+    flex-direction: row;
+    justify-items: flex-start;
+    align-items: center;
+    gap: 10px;
+}
+
+.row {
+    display: flex;
+    flex-direction: row;
+    gap: 30px;
+    justify-content: center;
+    align-items: center;
+}
+
+.input {
+    border: var(--border);
+    border-radius: var(--border-radius);
+    padding: 10px;
+}
+
+.width150 {
+    width: 150px;
+    text-align: center;
+}
+
+.width50 {
+    width: 50px;
+    text-align: center;
+}

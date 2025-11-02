@@ -14,7 +14,9 @@ const OptionsPage = () => {
           <div className={cn('font24', styles['header'])}>
             Настройки
           </div>
-          <NavigateButton label='Справочник комплексов' to='/complexes/' />
+          <NavigateButton label='Основные комплексы' to='/complexes/' />
+          <NavigateButton label='Физические комплексы' to='/physical_tests/' />
+          <NavigateButton label='Дополнительные комплексы' to='/additional_tests/' />
           <NavigateButton label='Требования к поясам' to='/belt_demands/' />
           <NavigateButton label='Прочие настройки' to='/program_options/' />
         </div>

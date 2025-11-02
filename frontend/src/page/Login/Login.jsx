@@ -1,10 +1,10 @@
 import styles from './Login.module.css';
 import LabelInput from '../../component/input/LabelInput/LabelInput';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import cn from 'classnames';
 import SubmitButton from '../../component/button/SubmitButton/SubmitButton';
-import { registerUserAPI, getTokenAPI } from '../../api/api';
+import { registerUserAPI, getTokenAPI, getOptionsAPI } from '../../api/api';
 import { tokenStore } from '../../store/store';
 
 
@@ -12,6 +12,17 @@ const Login = () => {
     const [login, setLogin] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
+    const [allowRegistration, setAllowRegistration] = useState(false);
+
+    useEffect(() => {
+            getOptionsAPI().then(data => data.success &&
+                data.result.forEach(option => {
+                    if (option.name == 'registration_allowed') {
+                        setAllowRegistration(option.value=='True' ? true : false);
+                    }
+                })
+            );
+        }, []);
 
     const loginUser = () => {
         getTokenAPI(login, password).then(data => {
@@ -46,7 +57,7 @@ const Login = () => {
         <LabelInput type='password' label='Пароль' id='pswd' name='pswd' placeholder='Введите пароль' value={password} onChange={setPassword}/>
         <div className={styles['menu_row']}>
           <SubmitButton label='Вход' onClick={loginUser} />
-          <SubmitButton label='Регистрация' onClick={registerUser} />
+          {allowRegistration && <SubmitButton label='Регистрация' onClick={registerUser} />}
         </div>
       </div>
     );

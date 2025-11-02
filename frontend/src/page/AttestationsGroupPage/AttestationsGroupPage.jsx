@@ -6,7 +6,8 @@ import SubmitButton from '../../component/button/SubmitButton/SubmitButton';
 import { useEffect, useState } from 'react';
 import SelectInput from '../../component/input/SelectInput/SelectInput';
 import AttestationsParticipant from './AttestationsParticipant';
-import { completeGroupAPI, getComplexGroupAPI, getOptionsAPI, getParticipantGroupAPI, getProfileAPI } from '../../api/api';
+import { completeGroupAPI, getComplexGroupAPI, getOptionsAPI,
+  getParticipantGroupAPI, getProfileAPI, getComplexesInGroupAPI } from '../../api/api';
 
 
 const AttestationsGroupPage = () => {
@@ -14,8 +15,10 @@ const AttestationsGroupPage = () => {
     const [sportsInRow, setSportsInRow] = useState(1);
     const [whoFinish, setWhoFinish] = useState();
     const [profile, setProfile] = useState({});
+    const [selectedComplexGroup, setSelectedComplexGroup] = useState(undefined);
     const [selectedComplex, setSelectedComplex] = useState();
-    const [complexes, setComplexes] = useState([]);
+    const [complexes, setComplexes] = useState();
+    const [complexesGroups, setComplexesGroups] = useState([]);
     const [group, setGroup] = useState({});
     const navigate = useNavigate();
 
@@ -26,8 +29,8 @@ const AttestationsGroupPage = () => {
     useEffect(() => {
         getComplexGroupAPI().then(data => {
             if (data.success) {
-                setComplexes(data.result);
-                setSelectedComplex(data.result[0].id);
+                setComplexesGroups(data.result);
+                setSelectedComplexGroup(data.result[0].id);
             }
         });
     }, []);
@@ -48,6 +51,22 @@ const AttestationsGroupPage = () => {
         );
     }, []);
 
+    useEffect(() => {
+      if (!selectedComplexGroup) {
+          return;
+      }
+        getComplexesInGroupAPI(selectedComplexGroup, groupId).then(data => {
+            if (data.success) {
+                setComplexes(data.result);
+                if (data.result.length) {
+                    setSelectedComplex(data.result[0].id);
+                } else {
+                    setSelectedComplex(undefined);
+                }
+            }
+        });
+    }, [selectedComplexGroup, groupId]);
+
     const completeAttestation = () => {
         completeGroupAPI(groupId).then(data => {
             if (data.success) {
@@ -66,15 +85,20 @@ const AttestationsGroupPage = () => {
           <div className={cn('font24')}>
             Аттестация "{group.name}"
           </div>
-          <div className={styles['submenu']}>
-            <SelectInput label='Группа комплекса' value={selectedComplex} options={complexes} onChange={setSelectedComplex}/>
+          <div className={styles['row']}>
+            <div className={styles['submenu']}>
+              <SelectInput label='Группа комплекса' value={selectedComplexGroup} options={complexesGroups} onChange={setSelectedComplexGroup}/>
+            </div>
+            <div className={styles['submenu']}>
+              <SelectInput label='Комплекс' value={selectedComplex} options={complexes} onChange={setSelectedComplex}/>
+            </div>
           </div>
           <div className={styles['submenu']}>
             Количество спортсменов в ряд: 
             <input type='number' min={1} max={15} value={sportsInRow} onChange={(e) => setSportsInRow(e.target.value)} />
           </div>
           <div className={styles['content']} style={{width: `${170*sportsInRow}px`}}>
-            {group.properties?.map(el => <AttestationsParticipant key={el.id} participant={el} complexGroup={selectedComplex} groupId={groupId} />)}
+            {group.properties?.map(el => <AttestationsParticipant key={el.id} participant={el} complex={selectedComplex} groupId={groupId} />)}
           </div>
         </div>
       </div>

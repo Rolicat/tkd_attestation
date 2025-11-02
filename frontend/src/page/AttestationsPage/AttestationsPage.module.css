@@ -26,6 +26,11 @@
     text-align: center;
 }
 
+.width200 {
+    width: 200px;
+    text-align: center;
+}
+
 .hr {
     width: 70%;
 }

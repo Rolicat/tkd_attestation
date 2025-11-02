@@ -3,7 +3,10 @@ from rest_framework import serializers
 from attestation.models import (
     Belt, Participant, Group, Option,
     ComplexGroup, Complex, BeltDemand,
-    Attestation, ParticipantGroup
+    Attestation, ParticipantGroup,
+    PhysicalTest, AdditionalTest,
+    AdditionalTestCriteria, AdditionalTestDemand,
+    PhysicalTestDemand, PhysicalTestPoint
 )
 
 
@@ -115,6 +118,34 @@ class BeltDemandUsedSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'properties')
 
 
+class AdditionalTestDemandSerializer(serializers.ModelSerializer):
+    """ Сериализатор состава требований доп комплексов по поясам. """
+
+    class Meta:
+        model = AdditionalTestDemand
+        fields = '__all__'
+
+
+class AdditionalTestDemandUsedPropertiesSerializer(
+    serializers.ModelSerializer
+):
+    """ Сериализатор состава требований по поясам. """
+    used = serializers.BooleanField()
+
+    class Meta:
+        model = AdditionalTestCriteria
+        fields = ('id', 'name', 'used')
+
+
+class AdditionalTestDemandUsedSerializer(serializers.ModelSerializer):
+    """ Сериализатор дополнительных тестов по поясам с их использованием. """
+    properties = AdditionalTestDemandUsedPropertiesSerializer(many=True)
+
+    class Meta:
+        model = AdditionalTest
+        fields = ('id', 'name', 'properties')
+
+
 class AttestationSerializer(serializers.ModelSerializer):
     """ Сериализатор данных аттестации. """
 
@@ -137,7 +168,7 @@ class AttestationComplexSerializer(serializers.Serializer):
     """ Сериализатор выставленных баллов. """
     id = serializers.IntegerField()
     name = serializers.CharField()
-    points = serializers.IntegerField()
+    points = serializers.FloatField()
     max = serializers.IntegerField()
 
 
@@ -145,3 +176,75 @@ class AttestationResultSerializer(serializers.Serializer):
     """ Сериализатор итогов аттестации. """
     id = serializers.IntegerField()
     value = serializers.CharField()
+
+
+class PhysicalTestSerializer(serializers.ModelSerializer):
+    """ Сериализатор физических комплексов. """
+    class Meta:
+        model = PhysicalTest
+        fields = '__all__'
+
+
+class AdditionalTestSerializer(serializers.ModelSerializer):
+    """ Сериализатор дополнительных комплексов. """
+    class Meta:
+        model = AdditionalTest
+        fields = '__all__'
+
+
+class AdditionalTestCriteriaSerializer(serializers.ModelSerializer):
+    """ Сериализатор справочника критериев дополнительных комплексов. """
+
+    class Meta:
+        model = AdditionalTestCriteria
+        fields = '__all__'
+
+
+class CriteriaTreeSerializer(serializers.ModelSerializer):
+    """ Сериализатор справочника критериев без владельца. """
+
+    class Meta:
+        model = AdditionalTestCriteria
+        fields = ('id', 'name', 'points')
+
+
+class TestTreeSerializer(serializers.ModelSerializer):
+    """ Сериализатор групп комплексов с критериями и баллами. """
+    properties = CriteriaTreeSerializer(many=True)
+
+    class Meta:
+        model = AdditionalTest
+        fields = '__all__'
+
+
+class PhysicalTestDemandSerializer(serializers.ModelSerializer):
+    """ Сериализатор требований физических комплексов. """
+    test = PhysicalTestSerializer()
+
+    class Meta:
+        model = PhysicalTestDemand
+        fields = '__all__'
+
+
+class PhysicalTestPointSerializer(serializers.ModelSerializer):
+    """ Сериализатор критериев процентажа физических тестов. """
+
+    class Meta:
+        model = PhysicalTestPoint
+        fields = '__all__'
+
+
+class PhysicalAttestationSerializer(serializers.Serializer):
+    """ Сериализатор выставленных баллов физических комплексов. """
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    points = serializers.FloatField()
+    max = serializers.IntegerField()
+
+
+class DemandsByGroupAndTestSerializer(serializers.Serializer):
+    """
+    Сериализатор информации по критериям и баллов для физического комплекса.
+    """
+    points = serializers.IntegerField()
+    criteria = serializers.IntegerField()

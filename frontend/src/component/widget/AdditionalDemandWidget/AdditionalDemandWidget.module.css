@@ -1,0 +1,36 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.header {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    width: 60%;
+    gap: 10px;
+}
+
+.demand_container {
+    border-left: 1px solid black;
+    padding-left: 20px;
+    padding-top: 10px;
+    padding-bottom: 5px;
+    width: 55%;
+    gap: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.name {
+    width: 100px;
+    border: var(--border);
+    border-radius: var(--border-radius);
+    padding: 10px;
+}

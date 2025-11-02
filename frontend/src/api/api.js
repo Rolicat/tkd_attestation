@@ -8,7 +8,8 @@ const MAIN_URL = VITE_URL ? VITE_URL : '';
 
 
 async function getAPI(url, params={}) {
-    const config = {...params, headers: {'Authorization': `Token ${tokenStore.token}`}};
+    const headers = tokenStore.token ? {'Authorization': `Token ${tokenStore.token}`} : {};
+    const config = {...params, headers: headers};
     try {
         const {data} = await axios.get(`${MAIN_URL}/${url}`, config);
         return { 'success': true, 'result': data };
@@ -127,8 +128,7 @@ export async function getComplexTreeAPI() {
     const data = await getAPI(
         'api/complexes/complex_tree/'
     );
-    return data;
-  
+    return data;  
 }
 
 
@@ -324,10 +324,10 @@ export async function getChoiceMenuAPI(url, params) {
 }
 
 
-export async function getAttestationComplexesAPI(participant, complex_group, group_id) {
+export async function getAttestationComplexesAPI(participant, complex_id, group_id) {
     const data = await getAPI(
-        'api/attestations/change_complex_group/',
-        {params: {participant: participant, complex_group: complex_group, group_id: group_id}}
+        'api/attestations/complex_point/',
+        {params: {participant: participant, complex_id: complex_id, group_id: group_id}}
     );
     return data;
 }
@@ -417,4 +417,213 @@ export async function postOptionsAPI(name, value) {
         {'name': name, 'value': value}
     );
     return data;  
+}
+
+
+export async function getPhysicalTestAPI() {
+    const data = await getAPI(
+        'api/physical_tests/'
+    );
+    return data;
+}
+
+
+export async function postPhysicalTestAPI() {
+    const data = await postAPI(
+        'api/physical_tests/',
+        {'name': 'Новый комплекс'}
+    );
+    return data;
+}
+
+
+export async function patchPhysicalTestAPI(id, name) {
+    const data = await patchAPI(
+        `api/physical_tests/${id}/`,
+        {'name': name}
+    );
+    return data;
+}
+
+
+export async function deletePhysicalTestAPI(id) {
+    const data = await deleteAPI(
+        `api/physical_tests/${id}/`
+    );
+    return data;
+}
+
+
+export async function getAdditionalTestsAPI() {
+    const data = await getAPI(
+        'api/additional_tests/'
+    );
+    return data;
+}
+
+
+export async function deleteAdditionalTestAPI(id) {
+    const data = await deleteAPI(
+        `api/additional_tests/${id}/`
+    );
+    return data;
+}
+
+
+export async function changeAdditionalTestAPI(id, name) {
+    const data = await patchAPI(
+        `api/additional_tests/${id}/`,
+        {'name': name}
+    );
+    return data;
+}
+
+
+export async function postAdditionalTestAPI() {
+    const data = await postAPI(
+        'api/additional_tests/',
+        {'name': 'Новый комплекс'}
+    );
+    return data;
+}
+
+
+export async function getCriteriaTreeAPI() {
+    const data = await getAPI(
+        'api/additional_test_criteria/criteria_tree/'
+    );
+    return data;  
+}
+
+
+export async function changeCriteriaAPI(id, name, points) {
+    const data = await patchAPI(
+        `api/additional_test_criteria/${id}/`,
+        {'name': name, 'points': points}
+    );
+    return data;  
+}
+
+
+export async function deleteCriteriaAPI(id) {
+    const data = await deleteAPI(
+        `api/additional_test_criteria/${id}/`
+    );
+    return data;
+}
+
+
+export async function postCriteriaAPI(id) {
+    const data = await postAPI(
+        'api/additional_test_criteria/',
+        {'name': 'Новый комплекс', 'additional_test': id}
+    );
+    return data;
+}
+
+
+export async function getAdditionalDemandsAPI(belt_id) {
+    const data = await getAPI(
+        'api/additional_test_demands/used_demands',
+        {params: {'belt_id': belt_id}}
+    );
+    return data;    
+}
+
+
+export async function postAdditionalTestDemandAPI(belt_id, criteria_id) {
+    const data = await postAPI(
+        'api/additional_test_demands/',
+        {'belt': belt_id, 'criteria': criteria_id}
+    );
+    return data;
+}
+
+
+export async function removeAdditionalTestDemandAPI(belt_id, criteria_id) {
+    const data = await deleteAPI(
+        'api/additional_test_demands/remove_criteria/',
+        {params:{'belt_id': belt_id, 'criteria_id': criteria_id}}
+    );
+    return data;
+}
+
+
+export async function getPhysicalDemandsAPI(belt_id) {
+    const data = await getAPI(
+        'api/physical_test_demands/belt_demands/',
+        {params: {'belt_id': belt_id}}
+    );
+    return data;    
+}
+
+
+export async function postPhysicalDemandsAPI(test_id, belt_id, criteria) {
+    const data = await postAPI(
+        'api/physical_test_demands/save_criteria/',
+        {'test_id': test_id, 'belt_id': belt_id, 'criteria': criteria}
+    );
+    return data;
+}
+
+
+export async function getPhysicalTestPointsAPI() {
+    const data = await getAPI(
+        'api/physical_test_points/'
+    );
+    return data;
+}
+
+
+export async function patchPhysicalTestPointsAPI(id, percent) {
+    const data = await patchAPI(
+        `api/physical_test_points/${id}/`,
+        {'percent': percent}
+    );
+    return data;
+}
+
+
+export async function getComplexesInGroupAPI(complexGroup_id, group_id) {
+    const data = await postAPI(
+        'api/complex_groups/complexes/',
+        {'complexGroup_id': complexGroup_id, 'group_id': group_id}
+    );
+    return data;
+}
+
+
+export async function getPhysicalTestsByGroup(group_id) {
+    const data = await postAPI(
+        'api/physical_tests/tests/',
+        {'group_id': group_id}
+    );
+    return data;
+}
+
+
+export async function getPhysicalAttestationResultAPI(participant_id, test_id) {
+    const data = await getAPI(
+        'api/attestations/physical_test_point/',
+        {params: {participant_id: participant_id, test_id: test_id}}
+    );
+    return data;
+}
+
+
+export async function postPhysicalAttestationResultAPI(participant_id, test_id, points) {
+    const data = await postAPI(
+        'api/attestations/set_physical_test_points/',
+        {participant_id: participant_id, test_id: test_id, points: points}
+    );
+    return data;   
+}
+
+
+export async function getDemandsByGroupAndTestAPI(group_id, test_id) {
+    const data = await getAPI(
+        'api/physical_test_demands/demands_by_group_test/',
+        {params:{'group_id': group_id, 'test_id': test_id}}
+    );
+    return data;
 }

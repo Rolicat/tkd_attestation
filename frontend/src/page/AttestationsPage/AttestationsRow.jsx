@@ -6,6 +6,7 @@ import refresh_icon from '/refresh.png';
 import flag_icon from '/flag.png';
 import list_icon from '/list.png';
 import play_icon from '/play.png';
+import physical_icon from '/physical.png';
 import { changeGroupAPI, restartGroupAPI } from '../../api/api';
 
 
@@ -36,13 +37,18 @@ const AttestationsRow = ({ record, setRecords, showResults }) => {
         return navigate(`/attestation/${record.id}`);
     };
 
+    const physicalAttestation = () => {
+        return navigate(`/physical_attestation/${record.id}`);
+    };
+
     return (
       <div className={styles['row']}>
-          <div className={cn(styles['width100'], styles['row_menu'])}>
+          <div className={cn(styles['width200'], styles['row_menu'])}>
             {record.status == 'Ожидание' && <IconButton icon={flag_icon} onClick={() => startAttestation()}/>}
             {record.status == 'В процессе' && <div className={styles['row_menu']}>
               <IconButton icon={refresh_icon} onClick={() => restartAttestation()}/>
               <IconButton icon={play_icon} onClick={() => continueAttestation()}/>
+              <IconButton icon={physical_icon} onClick={() => physicalAttestation()} />
             </div>}
             {record.status == 'Завершено' && <IconButton icon={list_icon} onClick={() => showResults(record.id)} />}
           </div>

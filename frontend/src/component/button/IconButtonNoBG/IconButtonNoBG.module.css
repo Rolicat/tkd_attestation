@@ -1,0 +1,19 @@
+.button {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 12px;
+    background-color: white;
+}
+
+.button:hover{
+    cursor: pointer;
+}
+
+.icon {
+    width: 16px;
+    height: 16px;
+}
