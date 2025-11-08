@@ -17,6 +17,7 @@ import AttestationsGroupPage from './page/AttestationsGroupPage/AttestationsGrou
 import PhysicalTestPage from './page/PhysicalTestPage/PhysicalTestPage';
 import AdditionalTestPage from './page/AdditionalTestPage/AdditionalTestPage';
 import PhysicalAttestationPage from './page/PhysicalAttestationPage/PhysicalAttestationPage';
+import AdditionalAttestationPage from './page/AdditionalAttestationPage/AdditionalAttestationPage';
 
 
 const router = createBrowserRouter(
@@ -36,6 +37,10 @@ const router = createBrowserRouter(
       {
         path: 'physical_attestation/:groupId',
         element: <PhysicalAttestationPage />
+      },
+      {
+        path: 'additional_attestation/:groupId',
+        element: <AdditionalAttestationPage />
       },
       {
         path: 'participants/',

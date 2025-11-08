@@ -627,3 +627,61 @@ export async function getDemandsByGroupAndTestAPI(group_id, test_id) {
     );
     return data;
 }
+
+
+export async function getAdditionalTestsByGroup(group_id) {
+    const data = await postAPI(
+        'api/additional_tests/criterias/',
+        {'group_id': group_id}
+    );
+    return data;
+}
+
+
+export async function getAdditionalAttestationResultAPI(participant_id, test_id) {
+    const data = await getAPI(
+        'api/attestations/additional_test_point/',
+        {params: {'participant_id': participant_id, 'test_id': test_id}}
+    );
+    return data;
+}
+
+
+export async function postAdditionalAttestationResultAPI(participant_id, test_id, criteria_id) {
+    const data = await postAPI(
+        'api/attestations/set_additional_test_points/',
+        {participant_id: participant_id, test_id: test_id, criteria_id: criteria_id}
+    );
+    return data;   
+}
+
+
+export async function getAdditionalTestCriteriasByTestAPI(test_id, group_id) {
+    const data = await getAPI(
+        'api/additional_test_criteria/criteria_by_test',
+        {params: {'test_id': test_id, 'group_id': group_id}}
+    );
+    return data;
+}
+
+
+export async function getAdditionalInfoAPI(group_id) {
+    const data = await getAPI(
+        'api/attestation_info/get_info_by_group/',
+        {params: {'group_id': group_id}}
+    );
+    return data;
+}
+
+
+export async function setAdditionalInfoAPI(group_id, complex_group_id, complex_id) {
+    const data = await postAPI(
+        'api/attestation_info/set_info_by_group/',
+        {
+          'group_id': group_id,
+          'complex_group_id': complex_group_id,
+          'complex_id': complex_id
+        }
+    );
+    return data;
+}

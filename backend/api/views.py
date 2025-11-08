@@ -12,7 +12,8 @@ from attestation.models import (
     PhysicalTest, AdditionalTest,
     AdditionalTestCriteria, AdditionalTestDemand,
     PhysicalTestDemand, PhysicalTestPoint,
-    PhysicalAttestation
+    PhysicalAttestation, AdditionalAttestation,
+    AttestationInfo
 )
 
 from api.serializers import (
@@ -28,7 +29,8 @@ from api.serializers import (
     TestTreeSerializer, AdditionalTestDemandUsedSerializer,
     AdditionalTestDemandSerializer, PhysicalTestDemandSerializer,
     PhysicalTestPointSerializer, PhysicalAttestationSerializer,
-    DemandsByGroupAndTestSerializer
+    DemandsByGroupAndTestSerializer, AdditionalAttestationSerializer,
+    AttestationInfoSerializer
 )
 
 from api.helpers import calc_attestation_points
@@ -483,6 +485,37 @@ class AttestationViewSet(viewsets.ModelViewSet):
         )
 
     @action(methods=('get',), detail=False)
+    def additional_test_point(self, request):
+        """ Возвращает текущие баллы за дополнительный комплекс. """
+        participant_id = request.GET.get('participant_id', None)
+        test_id = request.GET.get('test_id', None)
+        if (
+            participant_id is None or
+            test_id is None
+        ):
+            return Response(
+                status=HTTPStatus.BAD_REQUEST
+            )
+        test = AdditionalTest.objects.get(pk=test_id)
+        additional_attestation = AdditionalAttestation.objects.filter(
+            participant_id=participant_id,
+            test=test
+        ).first()
+        if additional_attestation is None:
+            data = {
+                'name': '',
+            }
+        else:
+            data = {
+                'name': additional_attestation.criteria.name,
+            }
+        serializer = AdditionalAttestationSerializer(instance=data)
+        return Response(
+            status=HTTPStatus.OK,
+            data=serializer.data
+        )
+
+    @action(methods=('get',), detail=False)
     def change_complex_group(self, request):
         """ Возвращает список комплексов и выставленных баллов. """
         participant_id = request.GET.get('participant', None)
@@ -596,6 +629,32 @@ class AttestationViewSet(viewsets.ModelViewSet):
         )
 
     @action(methods=('post',), detail=False)
+    def set_additional_test_points(self, request):
+        """ Устанавливаем баллы за дополнительный комплекс. """
+        participant_id = request.data.get('participant_id', None)
+        p_group = ParticipantGroup.objects.filter(
+            participant__id=participant_id
+        ).first()
+        if p_group is None or p_group.group.status != 'В процессе':
+            return Response(
+                status=HTTPStatus.BAD_REQUEST
+            )
+        test_id = request.data.get('test_id', None)
+        criteria_id = float(request.data.get('criteria_id', None))
+        if participant_id is None or test_id is None or criteria_id is None:
+            return Response(
+                status=HTTPStatus.BAD_REQUEST
+            )
+        AdditionalAttestation.objects.update_or_create(
+            participant_id=participant_id,
+            test_id=test_id,
+            defaults={'criteria_id': criteria_id}
+        )
+        return Response(
+            status=HTTPStatus.OK
+        )
+
+    @action(methods=('post',), detail=False)
     def restart_attestation(self, request):
         """ Перезапуск аттестации. """
         group_id = request.data.get('group_id', None)
@@ -606,6 +665,12 @@ class AttestationViewSet(viewsets.ModelViewSet):
         pgs = ParticipantGroup.objects.filter(group=group_id).all()
         for pg in pgs:
             Attestation.objects.filter(participant=pg.participant).delete()
+            PhysicalAttestation.objects.filter(
+                participant=pg.participant
+            ).delete()
+            AdditionalAttestation.objects.filter(
+                participant=pg.participant
+            ).delete()
         group = Group.objects.get(pk=group_id)
         group.status = 'Ожидание'
         group.save()
@@ -645,6 +710,55 @@ class AttestationViewSet(viewsets.ModelViewSet):
         return Response(
             status=HTTPStatus.OK,
             data=serializer.data
+        )
+
+
+class AttestationInfoViewSet(viewsets.ModelViewSet):
+    """ API информации об аттестации. """
+    queryset = AttestationInfo.objects.all()
+    serializer_class = AttestationInfoSerializer
+
+    @action(methods=('get',), detail=False)
+    def get_info_by_group(self, request):
+        """ Получить информацию по аттестации подгруппы. """
+        group_id = request.GET.get('group_id', None)
+        if group_id is None:
+            return Response(
+                status=HTTPStatus.BAD_REQUEST
+            )
+        info = AttestationInfo.objects.filter(group_id=group_id).first()
+        if info is None:
+            return Response(
+                status=HTTPStatus.BAD_REQUEST
+            )
+        serializer = AttestationInfoSerializer(instance=info)
+        return Response(
+            status=HTTPStatus.OK,
+            data=serializer.data
+        )
+
+    @action(methods=('post',), detail=False)
+    def set_info_by_group(self, request):
+        """ Установить информацию по аттестации подгруппы. """
+        group_id = request.data.get('group_id', None)
+        complex_group_id = request.data.get('complex_group_id', None)
+        complex_id = request.data.get('complex_id', None)
+        if group_id is None or complex_group_id is None or complex_id is None:
+            return Response(
+                status=HTTPStatus.BAD_REQUEST
+            )
+        group = Group.objects.get(pk=group_id)
+        complex_group = ComplexGroup.objects.get(pk=complex_group_id)
+        complex = Complex.objects.get(pk=complex_id)
+        AttestationInfo.objects.update_or_create(
+            group=group,
+            defaults={
+                'complex_group': complex_group,
+                'complex': complex
+            }
+        )
+        return Response(
+            status=HTTPStatus.OK
         )
 
 
@@ -690,6 +804,33 @@ class AdditionalTestViewSet(viewsets.ModelViewSet):
     queryset = AdditionalTest.objects.all()
     serializer_class = AdditionalTestSerializer
 
+    @action(methods=('post',), detail=False)
+    def criterias(self, request):
+        """ Получить дополнительные комплексы группы. """
+        group_id = request.data.get('group_id', None)
+        if group_id is None:
+            return Response(
+                status=HTTPStatus.BAD_REQUEST
+            )
+        group = Group.objects.get(pk=group_id)
+        belt = group.belt_attestation
+        belt_demands = AdditionalTestDemand.objects.filter(
+            belt=belt
+        ).values('criteria__additional_test').all()
+        tests_ids = []
+        for pbd in belt_demands:
+            if pbd['criteria__additional_test'] not in tests_ids:
+                tests_ids.append(pbd['criteria__additional_test'])
+        tests = AdditionalTest.objects.filter(pk__in=tests_ids).all()
+        serializer = AdditionalTestSerializer(
+            instance=tests,
+            many=True
+        )
+        return Response(
+            status=HTTPStatus.OK,
+            data=serializer.data
+        )
+
 
 class AdditionalTestCriteriaViewSet(viewsets.ModelViewSet):
     """ API критериев дополнительных комплексов. """
@@ -718,6 +859,33 @@ class AdditionalTestCriteriaViewSet(viewsets.ModelViewSet):
                 }
             )
         serializer = TestTreeSerializer(instance=data, many=True)
+        return Response(
+            status=HTTPStatus.OK,
+            data=serializer.data
+        )
+
+    @action(methods=('get',), detail=False)
+    def criteria_by_test(self, request):
+        """ Список критериев по тесту. """
+        test_id = request.GET.get('test_id', None)
+        group_id = request.GET.get('group_id', None)
+        if test_id is None or group_id is None:
+            return Response(
+                status=HTTPStatus.BAD_REQUEST
+            )
+        group = Group.objects.get(pk=group_id)
+        belt = group.belt_attestation
+        atds = AdditionalTestDemand.objects.filter(
+            belt=belt
+        ).all()
+        criterias = AdditionalTestCriteria.objects.filter(
+            additional_test_id=test_id,
+            pk__in=[_.criteria.id for _ in atds]
+        ).all()
+        serializer = AdditionalTestCriteriaSerializer(
+            instance=criterias,
+            many=True
+        )
         return Response(
             status=HTTPStatus.OK,
             data=serializer.data

@@ -24,23 +24,25 @@ const AttestationsParticipant = ({ participant, complex, groupId }) => {
     return (
       <div className={styles['participant']}>
         {participant.name}
-        <div className={styles['participant_score']}>
-          <div className={styles['participant_score_row']}>
-            {scoreTable.name}
-            <input className={styles['score']} type="number" min='0' max={scoreTable.max} step='0.5' value={scoreTable.points} onChange={
-              (e) => {
-                if ((0 <= e.target.value) & (e.target.value <= scoreTable.max)) {
-                  changeComplexPoints(scoreTable.id, e.target.value);
-                } else {
-                  alert(`Только от 0 до ${scoreTable.max} баллов`);
-                }
-              } 
-            } />
+        {complex &&
+          <div className={styles['participant_score']}>
+            <div className={styles['participant_score_row']}>
+              {scoreTable.name}
+              <input className={styles['score']} type="number" min='0' max={scoreTable.max} step='0.5' value={scoreTable.points} onChange={
+                (e) => {
+                  if ((0 <= e.target.value) & (e.target.value <= scoreTable.max)) {
+                    changeComplexPoints(scoreTable.id, e.target.value);
+                  } else {
+                    alert(`Только от 0 до ${scoreTable.max} баллов`);
+                  }
+                } 
+              } />
+            </div>
+            <div className={styles['points_score_row']}>
+              {judgePoints.map(el => <SubmitButton key={el} label={el} onClick={() => changeComplexPoints(el)} />)}
+            </div>
           </div>
-          <div className={styles['points_score_row']}>
-            {judgePoints.map(el => <SubmitButton key={el} label={el} onClick={() => changeComplexPoints(el)} />)}
-          </div>
-        </div>
+        }
       </div>
     );
 };

@@ -6,7 +6,8 @@ from attestation.models import (
     Attestation, ParticipantGroup,
     PhysicalTest, AdditionalTest,
     AdditionalTestCriteria, AdditionalTestDemand,
-    PhysicalTestDemand, PhysicalTestPoint
+    PhysicalTestDemand, PhysicalTestPoint,
+    AttestationInfo
 )
 
 
@@ -242,9 +243,22 @@ class PhysicalAttestationSerializer(serializers.Serializer):
     max = serializers.IntegerField()
 
 
+class AdditionalAttestationSerializer(serializers.Serializer):
+    """ Сериализатор выставленных баллов дополнительных комплексов. """
+    name = serializers.CharField()
+
+
 class DemandsByGroupAndTestSerializer(serializers.Serializer):
     """
     Сериализатор информации по критериям и баллов для физического комплекса.
     """
     points = serializers.IntegerField()
     criteria = serializers.IntegerField()
+
+
+class AttestationInfoSerializer(serializers.ModelSerializer):
+    """ Сериализатор информации об аттестации. """
+
+    class Meta:
+        model = AttestationInfo
+        fields = '__all__'

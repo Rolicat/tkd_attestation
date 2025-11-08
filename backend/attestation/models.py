@@ -426,6 +426,41 @@ class Attestation(models.Model):
         )
 
 
+class AttestationInfo(models.Model):
+    """ Данные о текущей аттестации. """
+    group = models.ForeignKey(
+        to=Group,
+        verbose_name='Группа',
+        help_text='Группа',
+        blank=False,
+        null=False,
+        on_delete=models.CASCADE
+    )
+    complex_group = models.ForeignKey(
+        to=ComplexGroup,
+        verbose_name='Группа комплекса',
+        help_text='Группа комплекса',
+        blank=False,
+        null=False,
+        on_delete=models.CASCADE
+    )
+    complex = models.ForeignKey(
+        to=Complex,
+        verbose_name='Комплекс',
+        help_text='Комплекс',
+        blank=False,
+        null=False,
+        on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return (
+            f'Группа: {self.group} '
+            f'Группа комплексов: {self.complex_group} '
+            f'Комплекс: {self.complex}'
+        )
+
+
 class PhysicalAttestation(models.Model):
     """ Данные по аттестации физических упражнений участников. """
     participant = models.ForeignKey(
@@ -471,15 +506,6 @@ class AdditionalAttestation(models.Model):
         on_delete=models.CASCADE,
         related_name='additional_attestations'
     )
-    complex = models.ForeignKey(
-        to=AdditionalTest,
-        verbose_name='Комплекс',
-        help_text='Комплекс',
-        blank=False,
-        null=False,
-        on_delete=models.CASCADE,
-        related_name='additional_attestations'
-    )
     criteria = models.ForeignKey(
         to=AdditionalTestCriteria,
         verbose_name='Выполненный критерий',
@@ -488,9 +514,17 @@ class AdditionalAttestation(models.Model):
         null=False,
         on_delete=models.CASCADE
     )
+    test = models.ForeignKey(
+        to=AdditionalTest,
+        verbose_name='Выполненный тест',
+        help_text='Выполненный тест',
+        blank=False,
+        null=False,
+        on_delete=models.CASCADE
+    )
 
     def __str__(self):
         return (
             f'{self.participant} ('
-            f'{self.complex} {self.criteria}'
+            f'{self.test} {self.criteria}'
         )

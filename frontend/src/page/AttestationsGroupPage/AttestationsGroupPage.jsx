@@ -7,7 +7,8 @@ import { useEffect, useState } from 'react';
 import SelectInput from '../../component/input/SelectInput/SelectInput';
 import AttestationsParticipant from './AttestationsParticipant';
 import { completeGroupAPI, getComplexGroupAPI, getOptionsAPI,
-  getParticipantGroupAPI, getProfileAPI, getComplexesInGroupAPI } from '../../api/api';
+  getParticipantGroupAPI, getProfileAPI, getComplexesInGroupAPI,
+  getAdditionalInfoAPI, setAdditionalInfoAPI } from '../../api/api';
 
 
 const AttestationsGroupPage = () => {
@@ -28,7 +29,7 @@ const AttestationsGroupPage = () => {
 
     useEffect(() => {
         getComplexGroupAPI().then(data => {
-            if (data.success) {
+            if (data.success && data.result.length) {
                 setComplexesGroups(data.result);
                 setSelectedComplexGroup(data.result[0].id);
             }
@@ -67,12 +68,28 @@ const AttestationsGroupPage = () => {
         });
     }, [selectedComplexGroup, groupId]);
 
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            getAdditionalInfoAPI(groupId).then(data => {
+                if (data.success) {
+                    setSelectedComplexGroup(data.result.complex_group);
+                    setSelectedComplex(data.result.complex);
+                }
+            });
+        }, 5000);
+        return () => clearInterval(intervalId);
+    }, [groupId]);
+
     const completeAttestation = () => {
         completeGroupAPI(groupId).then(data => {
             if (data.success) {
                 return navigate('/attestations/');
             }
         });
+    };
+
+    const changeAttestationInfo = (complex_group, complex) => {
+        setAdditionalInfoAPI(groupId, complex_group, complex);
     };
 
     return (
@@ -85,14 +102,16 @@ const AttestationsGroupPage = () => {
           <div className={cn('font24')}>
             Аттестация "{group.name}"
           </div>
-          <div className={styles['row']}>
-            <div className={styles['submenu']}>
-              <SelectInput label='Группа комплекса' value={selectedComplexGroup} options={complexesGroups} onChange={setSelectedComplexGroup}/>
+          {whoFinish == profile?.id &&
+            <div className={styles['row']}>
+              <div className={styles['submenu']}>
+                <SelectInput label='Группа комплекса' value={selectedComplexGroup} options={complexesGroups} onChange={(value) => {setSelectedComplexGroup(value); changeAttestationInfo(value, selectedComplex);}}/>
+              </div>
+              <div className={styles['submenu']}>
+                <SelectInput label='Комплекс' value={selectedComplex} options={complexes} onChange={(value) => {setSelectedComplex(value); changeAttestationInfo(selectedComplexGroup, value);}}/>
+              </div>
             </div>
-            <div className={styles['submenu']}>
-              <SelectInput label='Комплекс' value={selectedComplex} options={complexes} onChange={setSelectedComplex}/>
-            </div>
-          </div>
+          }
           <div className={styles['submenu']}>
             Количество спортсменов в ряд: 
             <input type='number' min={1} max={15} value={sportsInRow} onChange={(e) => setSportsInRow(e.target.value)} />

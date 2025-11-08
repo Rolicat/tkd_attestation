@@ -6,7 +6,8 @@ from attestation.models import (
     Attestation, ParticipantGroup,
     PhysicalTest, AdditionalTest,
     AdditionalTestCriteria, PhysicalTestPoint,
-    PhysicalTestDemand
+    PhysicalTestDemand, AdditionalAttestation,
+    AttestationInfo
 )
 
 
@@ -70,6 +71,11 @@ class AdditionalTestCriteriaAdmin(admin.ModelAdmin):
     ...
 
 
+class AdditionalAttestationAdmin(admin.ModelAdmin):
+    """ Админка для аттестации дополнительных комплексов. """
+    ...
+
+
 class PhysicalTestPointAdmin(admin.ModelAdmin):
     """ Админка критериев физических тестов. """
     ...
@@ -77,6 +83,11 @@ class PhysicalTestPointAdmin(admin.ModelAdmin):
 
 class PhysicalTestDemandAdmin(admin.ModelAdmin):
     """ Админка требований физических комплексов. """
+    ...
+
+
+class AttestationInfoAdmin(admin.ModelAdmin):
+    """ Админка информации об аттестации. """
     ...
 
 
@@ -94,3 +105,5 @@ admin.site.register(AdditionalTest, AdditionalTestAdmin)
 admin.site.register(AdditionalTestCriteria, AdditionalTestCriteriaAdmin)
 admin.site.register(PhysicalTestPoint, PhysicalTestPointAdmin)
 admin.site.register(PhysicalTestDemand, PhysicalTestDemandAdmin)
+admin.site.register(AdditionalAttestation, AdditionalAttestationAdmin)
+admin.site.register(AttestationInfo, AttestationInfoAdmin)

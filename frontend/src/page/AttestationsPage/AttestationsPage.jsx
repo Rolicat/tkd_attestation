@@ -3,7 +3,7 @@ import BackwardButton from '../../component/button/BackwardButton/BackwardButton
 import styles from './AttestationsPage.module.css';
 import cn from 'classnames';
 import AttestationsRow from './AttestationsRow';
-import { getGroupsAPI, getResultsAPI } from '../../api/api';
+import { getGroupsAPI, getResultsAPI, getOptionsAPI, getProfileAPI } from '../../api/api';
 import IconButton from '../../component/button/IconButton/IconButton';
 import close_icon from '/close.png';
 
@@ -12,6 +12,8 @@ const AttestationsPage = () => {
     const [groups, setGroups] = useState([]);
     const [groupResults, setGroupResults] = useState([]);
     const [groupResultVisible, setGroupResultVisible] = useState(false);
+    const [whoFinish, setWhoFinish] = useState();
+    const [profile, setProfile] = useState({});
 
     useEffect(() => {
         getGroupsAPI().then(data => data.success && setGroups(data.result));
@@ -19,10 +21,26 @@ const AttestationsPage = () => {
         return () => clearInterval(timerId);
     }, []);
 
+    useEffect(() => {
+        getOptionsAPI().then(data => data.success && 
+            data.result.forEach(option => {
+                if (option.name == 'who_finished_attestation') {
+                    setWhoFinish(option.value);
+                }
+            })
+        );
+    }, []);
+
+    useEffect(() => {
+            getProfileAPI().then(data => data.success && setProfile(data.result));
+        }, []);
+
     const viewGroupResults = (group_id) => {
         setGroupResultVisible(true);
         getResultsAPI(group_id).then(data => data.success && setGroupResults(data.result));
     };
+
+    const isRuler = whoFinish == profile.id;
 
     return (
       <div className={cn('container_column', styles['align_top'])}>
@@ -50,7 +68,7 @@ const AttestationsPage = () => {
             <div className={styles['width150']}> Результат </div>
           </div>
           <hr className={styles['hr']} />
-          {groups.map(record => <AttestationsRow key={record.id} record={record} setRecords={setGroups} showResults={viewGroupResults} />)}
+          {groups.map(record => <AttestationsRow key={record.id} record={record} setRecords={setGroups} showResults={viewGroupResults} isRuler={isRuler} />)}
         </div>
       </div>
     );
