@@ -62,9 +62,10 @@
     border: var(--border);
     border-radius: var(--border-radius);
     min-width: 300px;
-    min-height: 500px;
     z-index: 9999;
     background-color: white;
+    overflow-y: scroll;
+    max-height: 80%;
 }
 
 .result_close {

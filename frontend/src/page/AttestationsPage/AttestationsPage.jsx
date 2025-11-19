@@ -53,7 +53,9 @@ const AttestationsPage = () => {
               <IconButton icon={close_icon} onClick={() => setGroupResultVisible(false)}/>
             </div>
             {groupResults.map(el => <div key={el.id} >
-                {el.value}
+                <b>{el.value}</b>
+                {el.complexes.map(complex => <div key={complex.name}>{complex.name} - {complex.point}</div>
+                )}
               </div>)
             }
           </div>

@@ -173,10 +173,17 @@ class AttestationComplexSerializer(serializers.Serializer):
     max = serializers.IntegerField()
 
 
+class ComplexGroupPointsSerializer(serializers.Serializer):
+    """ Сериализатор баллов группы комплексов. """
+    name = serializers.CharField()
+    point = serializers.FloatField()
+
+
 class AttestationResultSerializer(serializers.Serializer):
     """ Сериализатор итогов аттестации. """
     id = serializers.IntegerField()
     value = serializers.CharField()
+    complexes = ComplexGroupPointsSerializer(many=True)
 
 
 class PhysicalTestSerializer(serializers.ModelSerializer):
