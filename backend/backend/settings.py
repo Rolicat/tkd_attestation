@@ -21,7 +21,7 @@ HOSTS = os.getenv('HOSTS', [])
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
-for host in HOSTS:
+for host in HOSTS.split(','):
     ALLOWED_HOSTS.append(host)
 
 

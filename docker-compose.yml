@@ -25,6 +25,7 @@ services:
     command: cp -r ./dist/. /frontend_static/
   gateway:
     build: ./gateway/
+    restart: always
     volumes:
       - static:/staticfiles/
     depends_on:

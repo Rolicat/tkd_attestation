@@ -8,4 +8,4 @@ COPY . .
 
 RUN pip install -r req.txt --no-cache-dir
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8001", "--timeout", "1200", "backend.wsgi"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--timeout", "1200", "backend.wsgi"]

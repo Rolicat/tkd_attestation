@@ -197,8 +197,8 @@ def calc_common_points(group_id: str) -> list[dict[int, str]]:
             {
                 'id': id,
                 'value': (
-                    f'{info['name']}: '
-                    f'{info['point']} из {points} '
+                    f'{info["name"]}: '
+                    f'{info["point"]} из {points} '
                     f'({percent} %)'
                 )
             }
