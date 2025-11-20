@@ -15,12 +15,11 @@ const AttestationsParticipant = ({ participant, complex, groupId }) => {
         getAttestationComplexesAPI(participant.id, complex, groupId).then(data => data.success && setScoreTable(data.result));
     }, [participant, complex, groupId]);
 
-    const changeComplexPoints = (value) => {
+    const changeComplexPoints = (participant_id, value) => {
         postAttestationComplexAPI(participant.id, complex, value).then(data => data.success &&
             setScoreTable(prev => {return {...prev, points: value};})
         );
     };
-
     return (
       <div className={styles['participant']}>
         {participant.name}

@@ -52,13 +52,17 @@ const AttestationsRow = ({ record, setRecords, showResults, isRuler }) => {
             {isRuler && <span>
               {record.status == 'Ожидание' && <IconButton icon={flag_icon} onClick={() => startAttestation()}/>}
               {record.status == 'В процессе' && <div className={styles['row_menu']}>
-                <IconButton icon={refresh_icon} onClick={() => restartAttestation()}/>
+                <IconButton icon={refresh_icon} onClick={() => restartAttestation()} />
+              </div>}
+            </span>
+            }
+            <span>
+              {record.status == 'В процессе' && <div className={styles['row_menu']}>
                 <IconButton icon={play_icon} onClick={() => continueAttestation()}/>
                 <IconButton icon={physical_icon} onClick={() => physicalAttestation()} />
                 <IconButton icon={additional_icon} onClick={() => additionalAttestation()} />
               </div>}
             </span>
-            }
             {record.status == 'Завершено' && <IconButton icon={list_icon} onClick={() => showResults(record.id)} />}
           </div>
           <div className={styles['width150']}>

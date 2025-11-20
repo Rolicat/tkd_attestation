@@ -18,7 +18,7 @@ const AttestationsGroupPage = () => {
     const [profile, setProfile] = useState({});
     const [selectedComplexGroup, setSelectedComplexGroup] = useState(undefined);
     const [selectedComplex, setSelectedComplex] = useState();
-    const [complexes, setComplexes] = useState();
+    const [complexes, setComplexes] = useState([]);
     const [complexesGroups, setComplexesGroups] = useState([]);
     const [group, setGroup] = useState({});
     const navigate = useNavigate();
@@ -53,22 +53,23 @@ const AttestationsGroupPage = () => {
     }, []);
 
     useEffect(() => {
-      if (!selectedComplexGroup) {
-          return;
-      }
+        if (!selectedComplexGroup) {
+            return;
+        }
         getComplexesInGroupAPI(selectedComplexGroup, groupId).then(data => {
             if (data.success) {
                 setComplexes(data.result);
-                if (data.result.length) {
-                    setSelectedComplex(data.result[0].id);
-                } else {
-                    setSelectedComplex(undefined);
-                }
             }
         });
     }, [selectedComplexGroup, groupId]);
 
     useEffect(() => {
+        getAdditionalInfoAPI(groupId).then(data => {
+              if (data.success) {
+                  setSelectedComplexGroup(data.result.complex_group);
+                  setSelectedComplex(data.result.complex);
+              }
+          });
         const intervalId = setInterval(() => {
             getAdditionalInfoAPI(groupId).then(data => {
                 if (data.success) {
