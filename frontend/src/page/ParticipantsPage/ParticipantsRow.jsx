@@ -16,6 +16,8 @@ const ParticipantsRow = ({record, setRecords, belts}) => {
     const [birthDate, setBirthDate] = useState(record.birth_date);
     const [belt, setBelt] = useState(belts.find(el => el.id == record.belt)?.name);
     const [selectedBelt, setSelectedBelt] = useState(record.belt);
+    const [sex, setSex] = useState(record.sex);
+    const sexValues = [{id: 'м', name: 'м'}, {id: 'ж', name: 'ж'}];
     const [editMode, setEditMode] = useState(false);
 
     const deleteRow = () => {
@@ -30,7 +32,8 @@ const ParticipantsRow = ({record, setRecords, belts}) => {
             'name': name,
             'patronymic': patronymic,
             'birth_date': birthDate,
-            'belt': selectedBelt
+            'belt': selectedBelt,
+            'sex': sex
         };
         changeParticipantAPI(record.id, participant).then(data => data.success &&
             setRecords(prev => prev.map(cur_record => {
@@ -41,7 +44,8 @@ const ParticipantsRow = ({record, setRecords, belts}) => {
                         'name': name,
                         'patronymic': patronymic,
                         'birth_date': birthDate,
-                        'belt': selectedBelt
+                        'belt': selectedBelt,
+                        'sex': sex
                     };
                 } else {
                     return cur_record;
@@ -83,6 +87,15 @@ const ParticipantsRow = ({record, setRecords, belts}) => {
             {editMode && <input className={cn(styles['width100'], styles['input'])}
               type='date' name='birthDate' value={birthDate}
               onChange={(e) => setBirthDate(e.target.value)}
+            />}
+          </div>
+          <div className={styles['width50']}>
+            {!editMode && sex}
+            {editMode && <SelectInput className={cn(styles['width100'], styles['input'])}
+              name='belt' value={sex} options={sexValues}
+              onChange={(value) => {
+                  setSex(value);
+              }}
             />}
           </div>
           <div className={styles['width100']}>

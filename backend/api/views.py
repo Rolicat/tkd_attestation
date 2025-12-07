@@ -13,7 +13,7 @@ from attestation.models import (
     AdditionalTestCriteria, AdditionalTestDemand,
     PhysicalTestDemand, PhysicalTestPoint,
     PhysicalAttestation, AdditionalAttestation,
-    AttestationInfo
+    AttestationInfo, AgePeriod
 )
 
 from api.serializers import (
@@ -30,7 +30,7 @@ from api.serializers import (
     AdditionalTestDemandSerializer, PhysicalTestDemandSerializer,
     PhysicalTestPointSerializer, PhysicalAttestationSerializer,
     DemandsByGroupAndTestSerializer, AdditionalAttestationSerializer,
-    AttestationInfoSerializer
+    AttestationInfoSerializer, AgePeriodSerializer
 )
 
 from api.helpers import calc_attestation_points
@@ -40,6 +40,12 @@ class BeltViewSet(viewsets.ModelViewSet):
     """ API справочника поясов. """
     queryset = Belt.objects.all().order_by('id')
     serializer_class = BeltSerializer
+
+
+class AgePeriodViewSet(viewsets.ModelViewSet):
+    """ API справочника возрастов. """
+    queryset = AgePeriod.objects.all().order_by('age_from')
+    serializer_class = AgePeriodSerializer
 
 
 class ParticipantViewSet(viewsets.ModelViewSet):
@@ -785,10 +791,10 @@ class PhysicalTestViewSet(viewsets.ModelViewSet):
         belt = group.belt_attestation
         belt_demands = PhysicalTestDemand.objects.filter(
             belt=belt
-        ).all()
+        ).values_list('test', flat=True).distinct().all()
         tests = []
         for pbd in belt_demands:
-            tests.append(pbd.test)
+            tests.append(PhysicalTest.objects.get(pk=pbd))
         serializer = PhysicalTestSerializer(
             instance=tests,
             many=True
@@ -964,16 +970,19 @@ class PhysicalTestDemandViewSet(viewsets.ModelViewSet):
     def belt_demands(self, request):
         """ Требования по поясу. """
         belt_pk = request.GET.get('belt_id', None)
-        if belt_pk is None:
+        age_period_pk = request.GET.get('age_period_id', None)
+        if belt_pk is None or age_period_pk is None:
             return Response(
                 status=HTTPStatus.BAD_REQUEST
             )
         belt = Belt.objects.get(pk=belt_pk)
+        age_period = AgePeriod.objects.get(pk=age_period_pk)
         tests = PhysicalTest.objects.all()
         results = []
         for test in tests:
             demand = PhysicalTestDemand.objects.filter(
                 belt=belt_pk,
+                age_period=age_period,
                 test=test
             ).first()
             result = {}
@@ -982,10 +991,13 @@ class PhysicalTestDemandViewSet(viewsets.ModelViewSet):
                 'name': test.name,
             }
             result['belt'] = belt
+            result['age_period'] = age_period
             if demand is None:
-                result['criteria'] = 0
+                result['criteria_male'] = 0
+                result['criteria_female'] = 0
             else:
-                result['criteria'] = demand.criteria
+                result['criteria_male'] = demand.criteria_female
+                result['criteria_female'] = demand.criteria_male
             results.append(result)
         serializer = PhysicalTestDemandSerializer(instance=results, many=True)
         return Response(
@@ -998,20 +1010,35 @@ class PhysicalTestDemandViewSet(viewsets.ModelViewSet):
         """ Сохранить  критерии. """
         test_pk = request.data.get('test_id', None)
         belt_pk = request.data.get('belt_id', None)
-        criteria = request.data.get('criteria', None)
-        if test_pk is None or belt_pk is None or criteria is None:
+        age_period_pk = request.data.get('age_period_id', None)
+        criteriaMale = request.data.get('criteriaMale', None)
+        criteriaFemale = request.data.get('criteriaFemale', None)
+        if (
+            test_pk is None or
+            belt_pk is None or
+            criteriaMale is None or
+            criteriaFemale is None or
+            age_period_pk is None
+        ):
             return Response(
                 status=HTTPStatus.BAD_REQUEST
             )
         test = PhysicalTest.objects.get(pk=test_pk)
         belt = Belt.objects.get(pk=belt_pk)
+        age_period = AgePeriod.objects.get(pk=age_period_pk)
         ptd = PhysicalTestDemand.objects.filter(
             test=test,
-            belt=belt
+            belt=belt,
+            age_period=age_period
         ).first()
         if ptd is None:
-            ptd = PhysicalTestDemand(test=test, belt=belt)
-        ptd.criteria = criteria
+            ptd = PhysicalTestDemand(
+                test=test,
+                belt=belt,
+                age_period=age_period
+            )
+        ptd.criteria_male = criteriaMale
+        ptd.criteria_female = criteriaFemale
         ptd.save()
         return Response(
             status=HTTPStatus.OK
@@ -1036,7 +1063,8 @@ class PhysicalTestDemandViewSet(viewsets.ModelViewSet):
             return Response(
                 status=HTTPStatus.BAD_REQUEST
             )
-        criteria = ptd.criteria
+        criteria_male = ptd.criteria_male
+        criteria_female = ptd.criteria_female
         percents_and_points = PhysicalTestPoint.objects.order_by(
             '-points'
         ).all()
@@ -1045,7 +1073,8 @@ class PhysicalTestDemandViewSet(viewsets.ModelViewSet):
             results.append(
                 {
                     'points': _.points,
-                    'criteria': round(criteria*_.percent/100, 0)
+                    'criteria_male': round(criteria_male*_.percent/100, 0),
+                    'criteria_female': round(criteria_female*_.percent/100, 0)
                 }
             )
         serializer = DemandsByGroupAndTestSerializer(

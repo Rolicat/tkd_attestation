@@ -58,6 +58,7 @@ const ParticipantsPage = () => {
             <div className={styles['width100']}> Имя </div>
             <div className={styles['width150']}> Отчество </div>
             <div className={styles['width100']}> Дата рождения </div>
+            <div className={styles['width50']}> Пол </div>
             <div className={styles['width100']}> Пояс </div>
           </div>
           <hr className={styles['hr']} />

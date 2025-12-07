@@ -7,7 +7,7 @@ from attestation.models import (
     PhysicalTest, AdditionalTest,
     AdditionalTestCriteria, PhysicalTestPoint,
     PhysicalTestDemand, AdditionalAttestation,
-    AttestationInfo
+    AttestationInfo, AgePeriod
 )
 
 
@@ -91,6 +91,11 @@ class AttestationInfoAdmin(admin.ModelAdmin):
     ...
 
 
+class AgePeriodAdmin(admin.ModelAdmin):
+    """ Админка справочника возрастов. """
+    ...
+
+
 admin.site.register(Belt, BeltAdmin)
 admin.site.register(Participant, ParticipantAdmin)
 admin.site.register(Group, GroupAdmin)
@@ -107,3 +112,4 @@ admin.site.register(PhysicalTestPoint, PhysicalTestPointAdmin)
 admin.site.register(PhysicalTestDemand, PhysicalTestDemandAdmin)
 admin.site.register(AdditionalAttestation, AdditionalAttestationAdmin)
 admin.site.register(AttestationInfo, AttestationInfoAdmin)
+admin.site.register(AgePeriod, AgePeriodAdmin)

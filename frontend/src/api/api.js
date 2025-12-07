@@ -549,19 +549,25 @@ export async function removeAdditionalTestDemandAPI(belt_id, criteria_id) {
 }
 
 
-export async function getPhysicalDemandsAPI(belt_id) {
+export async function getPhysicalDemandsAPI(belt_id, age_period_id) {
     const data = await getAPI(
         'api/physical_test_demands/belt_demands/',
-        {params: {'belt_id': belt_id}}
+        {params: {'belt_id': belt_id, 'age_period_id': age_period_id}}
     );
     return data;    
 }
 
 
-export async function postPhysicalDemandsAPI(test_id, belt_id, criteria) {
+export async function postPhysicalDemandsAPI(test_id, belt_id, agePeriod, criteriaMale, criteriaFemale) {
     const data = await postAPI(
         'api/physical_test_demands/save_criteria/',
-        {'test_id': test_id, 'belt_id': belt_id, 'criteria': criteria}
+        {
+          'test_id': test_id,
+          'belt_id': belt_id,
+          'age_period_id': agePeriod,
+          'criteriaMale': criteriaMale,
+          'criteriaFemale': criteriaFemale
+        }
     );
     return data;
 }
@@ -682,6 +688,23 @@ export async function setAdditionalInfoAPI(group_id, complex_group_id, complex_i
           'complex_group_id': complex_group_id,
           'complex_id': complex_id
         }
+    );
+    return data;
+}
+
+
+export async function getAgePeriodsAPI() {
+    const data = await getAPI(
+        'api/age_period/'
+    );
+    return data;
+}
+
+
+export async function postAgePeriodsAPI(age_from, age_to) {
+    const data = await postAPI(
+        'api/age_period/',
+        {'age_from': age_from, 'age_to': age_to}
     );
     return data;
 }

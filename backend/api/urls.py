@@ -10,7 +10,8 @@ from api.views import (
     ParticipantGroupViewSet, PhysicalTestViewSet,
     AdditionalTestViewSet, AdditionalTestCriteriaViewSet,
     AdditionalTestDemandViewSet, PhysicalTestDemandViewSet,
-    PhysicalTestPointViewSet, AttestationInfoViewSet
+    PhysicalTestPointViewSet, AttestationInfoViewSet,
+    AgePeriodViewSet
 )
 
 router = routers.DefaultRouter()
@@ -30,6 +31,7 @@ router.register('additional_test_demands', AdditionalTestDemandViewSet)
 router.register('physical_test_demands', PhysicalTestDemandViewSet)
 router.register('physical_test_points', PhysicalTestPointViewSet)
 router.register('attestation_info', AttestationInfoViewSet)
+router.register('age_period', AgePeriodViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),

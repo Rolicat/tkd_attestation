@@ -1,0 +1,36 @@
+.container {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    background-color: white;
+    border-radius: var(--border-radius);
+    border: var(--border);
+    width: 70%;
+    height: 70%;
+    left: 20%;
+    top: 10%;
+}
+
+.content {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+}
+
+.menu {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+}
+
+.error {
+    color: red;
+}

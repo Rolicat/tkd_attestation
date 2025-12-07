@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.db.models import Sum
 
 from attestation.models import (
@@ -7,6 +9,15 @@ from attestation.models import (
     AdditionalAttestation, AdditionalTest,
     ParticipantGroup
 )
+
+
+def calc_age(birth_date: date) -> int:
+    """ Возвращает возраст участника на основании даты рождения. """
+    today = date.today()
+    return (
+        today.year - birth_date.year -
+        ((today.month, today.day) < (birth_date.month, birth_date.day))
+    )
 
 
 def calc_attestation_points(
@@ -59,10 +70,13 @@ def calc_average_points(group_id: str) -> list[dict[int, str]]:
             name = Participant.objects.get(
                 pk=id
             ).short_name()
-            calced_points = round(
-                attestation['points__sum'] / len(complexes) / judges_count,
-                2
-            )
+            if len(complexes) and judges_count:
+                calced_points = round(
+                    attestation['points__sum'] / len(complexes) / judges_count,
+                    2
+                )
+            else:
+                calced_points = 0
             if id in results:
                 results[id]['complexes'].append(
                     {
@@ -91,7 +105,8 @@ def calc_average_points(group_id: str) -> list[dict[int, str]]:
         calced_points = calc_physical_points(
             points=attestation.points,
             test=attestation.test,
-            belt=group.belt_attestation
+            belt=group.belt_attestation,
+            participant=attestation.participant
         )
         if id in common_points:
             common_points[id] += calced_points
@@ -102,7 +117,10 @@ def calc_average_points(group_id: str) -> list[dict[int, str]]:
         name = Participant.objects.get(
             pk=id
         ).short_name()
-        points = round(calced_points / len(tests), 2)
+        if len(tests):
+            points = round(calced_points / len(tests), 2)
+        else:
+            points = 0
         if id in results:
             results[id]['complexes'].append(
                 {
@@ -206,18 +224,29 @@ def calc_common_points(group_id: str) -> list[dict[int, str]]:
     return data
 
 
-def calc_physical_points(test: PhysicalTest, points: int, belt: Belt) -> int:
+def calc_physical_points(
+        test: PhysicalTest,
+        points: int,
+        belt: Belt,
+        participant: Participant
+) -> int:
     """ Рассчитывает оценку на основании выполненного критерия. """
-    print(f'{test=} {points=} {belt=}')
+    age = calc_age(participant.birth_date)
     test_demand = PhysicalTestDemand.objects.filter(
         test=test,
-        belt=belt
+        belt=belt,
+        age_period__age_from__lte=age,
+        age_period__age_to__gte=age
     ).first()
     if test_demand is None:
         return 0
-    max_points = test_demand.criteria
+    if participant.sex == 'm':
+        max_points = test_demand.criteria_male
+    else:
+        max_points = test_demand.criteria_female
+    if not max_points:
+        return 0
     points_percent = round(min(points, max_points) * 100 / max_points, 2)
-    print(f'{points_percent=}')
     test_points = PhysicalTestPoint.objects.filter(
         percent__gte=points_percent
     ).order_by('percent').first()

@@ -61,9 +61,9 @@ const PhysicalAttestationPage = () => {
             <div className={styles['submenu']}>
               <SelectInput label='Физические комплексы' value={selectedPhysicalTest} options={physicalTests} onChange={setSelectedPhysicalTest}/>
             </div>
-            <div>
+            <div className={styles['submenu_column']}>
               {demandsByGroupAndTest.map(el => <div>
-                  Оценка: {el.points} - {el.criteria} раз(а)
+                  Оценка: {el.points} - м: {el.criteria_male} ж: {el.criteria_female} раз(а)
               </div>)}
             </div>
           </div>

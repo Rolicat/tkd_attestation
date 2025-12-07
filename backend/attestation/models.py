@@ -56,6 +56,15 @@ class Participant(models.Model):
         on_delete=models.PROTECT,
         related_name='participants'
     )
+    sex = models.CharField(
+        verbose_name='Пол',
+        help_text='Пол',
+        blank=False,
+        null=False,
+        max_length=1,
+        default='м',
+        choices=(('м', 'м'), ('ж', 'ж'))
+    )
 
     def short_name(self):
         """ Возвращает ФИО формата Фамилия И.О. """
@@ -135,6 +144,25 @@ class Group(models.Model):
 
     def __str__(self):
         return f'Группа: {self.name}'
+
+
+class AgePeriod(models.Model):
+    """ Таблица периодов возраста. """
+    age_from = models.SmallIntegerField(
+        verbose_name='Возраст от',
+        help_text='Возраст от',
+        blank=False,
+        null=False
+    )
+    age_to = models.SmallIntegerField(
+        verbose_name='Возраст до',
+        help_text='Возраст до',
+        blank=False,
+        null=False
+    )
+
+    def __str__(self):
+        return f'{self.age_from} - {self.age_to}'
 
 
 class ParticipantGroup(models.Model):
@@ -280,9 +308,16 @@ class PhysicalTestDemand(models.Model):
         null=False,
         on_delete=models.CASCADE
     )
-    criteria = models.SmallIntegerField(
-        verbose_name='Критерий',
-        help_text='Критерий',
+    criteria_male = models.SmallIntegerField(
+        verbose_name='Критерий для мужчин',
+        help_text='Критерий для мужчин',
+        blank=False,
+        null=False,
+        default=0
+    )
+    criteria_female = models.SmallIntegerField(
+        verbose_name='Критерий для женщин',
+        help_text='Критерий для женщин',
         blank=False,
         null=False,
         default=0
@@ -294,6 +329,14 @@ class PhysicalTestDemand(models.Model):
         blank=False,
         null=False,
         on_delete=models.CASCADE
+    )
+    age_period = models.ForeignKey(
+        to=AgePeriod,
+        verbose_name='Возраста',
+        help_text='Возраста',
+        blank=False,
+        null=False,
+        on_delete=models.CASCADE,
     )
 
 

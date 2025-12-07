@@ -12,7 +12,16 @@
     flex-direction: row;
     justify-items: flex-start;
     align-items: flex-start;
-    width: 70%;
+    width: 90%;
+    gap: 20px;
+}
+
+.submenu_column {
+    display: flex;
+    flex-direction: column;
+    justify-items: flex-start;
+    align-items: flex-start;
+    width: 90%;
     gap: 20px;
 }
 

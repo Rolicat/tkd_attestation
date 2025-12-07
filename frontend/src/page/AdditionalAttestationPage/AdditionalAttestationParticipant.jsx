@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import styles from './AdditionalAttestationPage.module.css';
 import SubmitButton from '../../component/button/SubmitButton/SubmitButton';
 import { getAdditionalAttestationResultAPI, postAdditionalAttestationResultAPI } from '../../api/api';
-import SelectInput from '../../component/input/SelectInput/SelectInput';
 
 
 const AdditionalAttestationParticipant = ({ participant, additionalTest, groupId, criterias }) => {

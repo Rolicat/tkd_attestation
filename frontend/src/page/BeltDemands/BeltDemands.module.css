@@ -10,8 +10,7 @@
 .submenu {
     display: flex;
     flex-direction: row;
-    justify-items: flex-start;
-    align-items: flex-start;
-    width: 70%;
+    justify-items: center;
+    align-items: center;
     gap: 20px;
 }

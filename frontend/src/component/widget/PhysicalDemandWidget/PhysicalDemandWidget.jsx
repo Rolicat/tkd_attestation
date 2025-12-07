@@ -3,16 +3,23 @@ import { useEffect, useState } from 'react';
 import { postPhysicalDemandsAPI } from '../../../api/api';
 
 
-const PhysicalDemandWidget = ({ demand, belt }) => {
-    const [criteria, setCriteria] = useState(0);
+const PhysicalDemandWidget = ({ demand, belt, agePeriod }) => {
+    const [criteriaMale, setCriteriaMale] = useState(0);
+    const [criteriaFemale, setCriteriaFemale] = useState(0);
 
-    const changeCriteria = (value) => {
-        setCriteria(value);
-        postPhysicalDemandsAPI(demand.test.id, belt, value);
+    const changeCriteriaMale = (value) => {
+        setCriteriaMale(value);
+        postPhysicalDemandsAPI(demand.test.id, belt, agePeriod, value, criteriaFemale);
+    };
+
+    const changeCriteriaFemale = (value) => {
+        setCriteriaFemale(value);
+        postPhysicalDemandsAPI(demand.test.id, belt, agePeriod, criteriaMale, value);
     };
 
     useEffect(() => {
-      setCriteria(demand.criteria);
+      setCriteriaMale(demand.criteria_male);
+      setCriteriaFemale(demand.criteria_female);
     }, [demand]);
 
     return (
@@ -21,7 +28,8 @@ const PhysicalDemandWidget = ({ demand, belt }) => {
           <div>
             {demand.test.name}
           </div>
-          количество: <input className={styles['points']} type='text' value={criteria} onChange={e => changeCriteria(e.target.value)} />
+          количество (м): <input className={styles['points']} type='text' value={criteriaMale} onChange={e => changeCriteriaMale(e.target.value)} />
+          количество (ж): <input className={styles['points']} type='text' value={criteriaFemale} onChange={e => changeCriteriaFemale(e.target.value)} />
         </div>
       </div>
     );

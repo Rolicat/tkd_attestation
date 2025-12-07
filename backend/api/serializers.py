@@ -7,7 +7,7 @@ from attestation.models import (
     PhysicalTest, AdditionalTest,
     AdditionalTestCriteria, AdditionalTestDemand,
     PhysicalTestDemand, PhysicalTestPoint,
-    AttestationInfo
+    AttestationInfo, AgePeriod
 )
 
 
@@ -15,6 +15,18 @@ class BeltSerializer(serializers.ModelSerializer):
     """ Сериализатор справочника поясов. """
     class Meta:
         model = Belt
+        fields = '__all__'
+
+
+class AgePeriodSerializer(serializers.ModelSerializer):
+    """ Сериализатор справочника возрастов. """
+    name = serializers.SerializerMethodField('combine_name')
+
+    def combine_name(self, instance):
+        return f'{instance.age_from} - {instance.age_to}'
+
+    class Meta:
+        model = AgePeriod
         fields = '__all__'
 
 
@@ -70,7 +82,6 @@ class ComplexSerializer(serializers.ModelSerializer):
 
 class ComplexTreeSerializer(serializers.ModelSerializer):
     """ Сериализатор справочника комплексов без владельца. """
-
     class Meta:
         model = Complex
         fields = ('id', 'name', 'points')
@@ -78,7 +89,6 @@ class ComplexTreeSerializer(serializers.ModelSerializer):
 
 class ComplexGroupSerializer(serializers.ModelSerializer):
     """ Сериализатор групп комплексов. """
-
     class Meta:
         model = ComplexGroup
         fields = '__all__'
@@ -95,7 +105,6 @@ class ComplexGroupTreeSerializer(serializers.ModelSerializer):
 
 class BeltDemandSerializer(serializers.ModelSerializer):
     """ Сериализатор справочника требований к поясам. """
-
     class Meta:
         model = BeltDemand
         fields = '__all__'
@@ -121,7 +130,6 @@ class BeltDemandUsedSerializer(serializers.ModelSerializer):
 
 class AdditionalTestDemandSerializer(serializers.ModelSerializer):
     """ Сериализатор состава требований доп комплексов по поясам. """
-
     class Meta:
         model = AdditionalTestDemand
         fields = '__all__'
@@ -149,7 +157,6 @@ class AdditionalTestDemandUsedSerializer(serializers.ModelSerializer):
 
 class AttestationSerializer(serializers.ModelSerializer):
     """ Сериализатор данных аттестации. """
-
     class Meta:
         model = Attestation
         fields = '__all__'
@@ -228,6 +235,7 @@ class TestTreeSerializer(serializers.ModelSerializer):
 class PhysicalTestDemandSerializer(serializers.ModelSerializer):
     """ Сериализатор требований физических комплексов. """
     test = PhysicalTestSerializer()
+    age_period = AgePeriodSerializer()
 
     class Meta:
         model = PhysicalTestDemand
@@ -260,7 +268,8 @@ class DemandsByGroupAndTestSerializer(serializers.Serializer):
     Сериализатор информации по критериям и баллов для физического комплекса.
     """
     points = serializers.IntegerField()
-    criteria = serializers.IntegerField()
+    criteria_male = serializers.IntegerField()
+    criteria_female = serializers.IntegerField()
 
 
 class AttestationInfoSerializer(serializers.ModelSerializer):
