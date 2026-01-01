@@ -2,7 +2,7 @@ import styles from './ProgramOptionsPage.module.css';
 import cn from 'classnames';
 import BackwardButton from '../../component/button/BackwardButton/BackwardButton';
 import { useEffect, useState } from 'react';
-import { getOptionsAPI, getUsersAPI, postOptionsAPI} from '../../api/api';
+import { getOptionsAPI, getUsersAPI, postOptionsAPI, postUploadComplexes, postUploadUpgrade } from '../../api/api';
 import LabelInput from '../../component/input/LabelInput/LabelInput';
 import SelectInput from '../../component/input/SelectInput/SelectInput';
 import LabelCheckInput from '../../component/input/LabelCheckInput/LabelCheckInput';
@@ -55,6 +55,16 @@ const ProgramOptionsPage = () => {
           <div>
             <LabelCheckInput label='Разрешить регистрацию' id='allow_registration' checked={allowRegistration}
               onChange={(val) => {setAllowRegistration(val); saveOption('registration_allowed', val);}} />
+          </div>
+          <div>
+            Загрузить комплексы: 
+            <input id='load_complexes' type='file' 
+              onChange={(e) => postUploadComplexes(e.target.files).then(() => alert('Загрузка завершена.'))} />
+          </div>
+          <div>
+            Загрузить обновление программы:
+            <input id='load_upgrade' type='file' 
+              onChange={(e) => postUploadUpgrade(e.target.files).then(() => alert('Файл успешно загружен. Обновите страницу через 1 мин.'))} />
           </div>
         </div>
       </div>

@@ -256,7 +256,7 @@ class Complex(models.Model):
         help_text='Балл',
         blank=False,
         null=False,
-        default=0
+        default=5
     )
 
     def __str__(self):

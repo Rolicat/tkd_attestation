@@ -29,8 +29,9 @@ async function getAPI(url, params={}) {
 }
 
 
-async function postAPI(url, post_data, params={}) {
-    const config = {...params, headers: {'Authorization': `Token ${tokenStore.token}`}};
+async function postAPI(url, post_data, params={}, headers={}) {
+    headers['Authorization'] = `Token ${tokenStore.token}`;
+    const config = {...params, headers: headers};
     try {
         const {data} = await axios.post(`${MAIN_URL}/${url}`, post_data, config);
         return { 'success': true, 'result': data };
@@ -705,6 +706,32 @@ export async function postAgePeriodsAPI(age_from, age_to) {
     const data = await postAPI(
         'api/age_period/',
         {'age_from': age_from, 'age_to': age_to}
+    );
+    return data;
+}
+
+
+export async function postUploadComplexes(files) {
+    var formData = new FormData();
+    formData.append('file', files[0]);
+    const data = await postAPI(
+        'api/options/preload_complexes/',
+        formData,
+        {},
+        {'Content-Type': 'multipart/form-data'}
+    );
+    return data;
+}
+
+
+export async function postUploadUpgrade(files) {
+    var formData = new FormData();
+    formData.append('file', files[0]);
+    const data = await postAPI(
+        'api/options/upgrade_program/',
+        formData,
+        {},
+        {'Content-Type': 'multipart/form-data'}
     );
     return data;
 }

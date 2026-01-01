@@ -1,4 +1,9 @@
 from http import HTTPStatus
+from csv import reader
+import os
+import zipfile
+
+from django.conf import settings
 
 from rest_framework import viewsets
 from rest_framework.response import Response
@@ -274,6 +279,52 @@ class OptionViewSet(viewsets.ModelViewSet):
             )
         option.value = value
         option.save()
+        return Response(
+            status=HTTPStatus.OK
+        )
+
+    @action(methods=('post',), detail=False)
+    def preload_complexes(self, request):
+        """ Загрузка данных комлексов. """
+        AttestationInfo.objects.all().delete()
+        Attestation.objects.all().delete()
+        BeltDemand.objects.all().delete()
+        Complex.objects.all().delete()
+        ComplexGroup.objects.all().delete()
+        file = request.data['file']
+        file_path = os.path.join(settings.TEMPLATE_ROOT, 'tmp.csv')
+        with open(file_path, 'wb') as csvfile:
+            csvfile.write(file.read())
+        with open(file_path, 'r') as csvfile:
+            csv_reader = reader(csvfile, delimiter=';')
+            cg = ComplexGroup()
+            for row in csv_reader:
+                if row[0] == '':
+                    cg = ComplexGroup(name=row[1])
+                    cg.save()
+                else:
+                    complex = Complex(
+                        name=row[1],
+                        complex_group=cg
+                    )
+                    complex.save()
+        os.remove(file_path)
+        return Response(
+            status=HTTPStatus.OK
+        )
+
+    @action(methods=('post',), detail=False)
+    def upgrade_program(self, request):
+        """ Загрузка данных комлексов. """
+        file = request.data['file']
+        file_path = os.path.join(settings.TEMPLATE_ROOT, 'update.zip')
+        with open(file_path, 'wb') as archive_file:
+            archive_file.write(file.read())
+        if zipfile.is_zipfile(file_path):
+            z_file = zipfile.ZipFile(file_path, 'r')
+            z_file.extractall(settings.BASE_DIR.parent)
+            z_file.close()
+        os.remove(file_path)
         return Response(
             status=HTTPStatus.OK
         )
