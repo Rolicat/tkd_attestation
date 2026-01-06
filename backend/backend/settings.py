@@ -139,6 +139,9 @@ STATIC_URL = 'static/'
 STATIC_ROOT = 'collected_static/'
 TEMPLATE_ROOT = BASE_DIR / 'tmp/'
 
+if not os.path.exists(TEMPLATE_ROOT):
+    os.makedirs(TEMPLATE_ROOT)
+
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

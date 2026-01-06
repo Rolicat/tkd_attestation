@@ -6,7 +6,7 @@ services:
   db:
     image: postgres:16.9
     restart: always
-    env_file: ./backend/.env
+    env_file: ./.env
     volumes:
       - pg_data:/var/lib/postgresql/data
   backend:
