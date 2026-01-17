@@ -38,7 +38,7 @@ const AttestationsParticipant = ({ participant, complex, groupId }) => {
               } />
             </div>
             <div className={styles['points_score_row']}>
-              {judgePoints.map(el => <SubmitButton key={el} label={el} onClick={() => changeComplexPoints(el)} />)}
+              {judgePoints.map(el => <SubmitButton key={el} label={el} onClick={() => changeComplexPoints(participant.id, el)} />)}
             </div>
           </div>
         }
