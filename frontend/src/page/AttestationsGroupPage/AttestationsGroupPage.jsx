@@ -3,6 +3,9 @@ import styles from './AttestationsGroupPage.module.css';
 import cn from 'classnames';
 import BackwardButton from '../../component/button/BackwardButton/BackwardButton';
 import SubmitButton from '../../component/button/SubmitButton/SubmitButton';
+import IconButton from '../../component/button/IconButton/IconButton';
+import backward_icon from '/backward.png';
+import forward_icon from '/forward.png';
 import { useEffect, useState } from 'react';
 import SelectInput from '../../component/input/SelectInput/SelectInput';
 import AttestationsParticipant from './AttestationsParticipant';
@@ -79,7 +82,7 @@ const AttestationsGroupPage = () => {
             });
         }, 5000);
         return () => clearInterval(intervalId);
-    }, [groupId]);
+    }, [groupId, selectedComplexGroup, selectedComplex]);
 
     const completeAttestation = () => {
         completeGroupAPI(groupId).then(data => {
@@ -91,6 +94,34 @@ const AttestationsGroupPage = () => {
 
     const changeAttestationInfo = (complex_group, complex) => {
         setAdditionalInfoAPI(groupId, complex_group, complex);
+    };
+
+    const changeCurrentGroupComplex = (step) => {
+        const indx = complexesGroups.findIndex((el) => el.id == selectedComplexGroup);
+        if (step > 0 && indx < complexesGroups.length) {
+            setSelectedComplexGroup(complexesGroups[indx+step].id);
+        }
+        else if (step < 0 && indx > 0) {
+            setSelectedComplexGroup(complexesGroups[indx+step].id);
+        }
+        else {
+            return;
+        }
+        changeAttestationInfo(complexesGroups[indx+step].id, selectedComplex);
+    };
+
+    const changeCurrentComplex = (step) => {
+        const indx = complexes.findIndex((el) => el.id == selectedComplex);
+        if (step > 0 && indx < complexes.length) {
+            setSelectedComplex(complexes[indx+step].id);
+        }
+        else if (step < 0 && indx > 0) {
+            setSelectedComplex(complexes[indx+step].id);
+        }
+        else {
+            return;
+        }
+        changeAttestationInfo(selectedComplexGroup, complexes[indx+step].id);
     };
 
     return (
@@ -105,12 +136,16 @@ const AttestationsGroupPage = () => {
           </div>
           {whoFinish == profile?.id &&
             <div className={styles['row']}>
+              <IconButton icon={backward_icon} onClick={() => changeCurrentGroupComplex(-1)}/>
               <div className={styles['submenu']}>
                 <SelectInput label='Группа комплекса' value={selectedComplexGroup} options={complexesGroups} onChange={(value) => {setSelectedComplexGroup(value); changeAttestationInfo(value, selectedComplex);}}/>
               </div>
+              <IconButton icon={forward_icon} onClick={() => changeCurrentGroupComplex(1)}/>
+              <IconButton icon={backward_icon} onClick={() => changeCurrentComplex(-1)} />
               <div className={styles['submenu']}>
                 <SelectInput label='Комплекс' value={selectedComplex} options={complexes} onChange={(value) => {setSelectedComplex(value); changeAttestationInfo(selectedComplexGroup, value);}}/>
               </div>
+              <IconButton icon={forward_icon} onClick={() => changeCurrentComplex(1)} />
             </div>
           }
           <div className={styles['submenu']}>

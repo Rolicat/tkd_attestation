@@ -20,11 +20,44 @@ const AttestationsParticipant = ({ participant, complex, groupId }) => {
             setScoreTable(prev => {return {...prev, points: value};})
         );
     };
+
+    const handleKeyDown = (event) => {
+        switch (parseInt(event.key)) {
+            case 1:
+                changeComplexPoints(participant.id, 1);
+                break;
+            case 2:
+                changeComplexPoints(participant.id, 1.5);
+                break;
+            case 3:
+                changeComplexPoints(participant.id, 2);
+                break;
+            case 4:
+                changeComplexPoints(participant.id, 2.5);
+                break;
+            case 5:
+                changeComplexPoints(participant.id, 3);
+                break;
+            case 6:
+                changeComplexPoints(participant.id, 3.5);
+                break;
+            case 7:
+                changeComplexPoints(participant.id, 4);
+                break;
+            case 8:
+                changeComplexPoints(participant.id, 4.5);
+                break;
+            case 9:
+                changeComplexPoints(participant.id, 5);
+                break;
+        }
+    };
+
     return (
-      <div className={styles['participant']}>
+      <div className={styles['participant']} >
         {participant.name}
         {complex &&
-          <div className={styles['participant_score']}>
+          <div className={styles['participant_score']} onMouseEnter={(e) => e.target.focus()} tabIndex={0} onKeyDown={handleKeyDown}>
             <div className={styles['participant_score_row']}>
               {scoreTable.name}
               <input className={styles['score']} type="number" min='0' max={scoreTable.max} step='0.5' value={scoreTable.points} onChange={
