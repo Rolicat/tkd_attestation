@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
 from rest_framework.authentication import BasicAuthentication
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from attestation.models import (
     Belt, Participant, Group, Option,
@@ -47,7 +48,16 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     queryset = get_user_model().objects.all()
     serializer_class = CustomUserSerializer
     permission_classes = (AllowAny, )
-    authentication_classes = (BasicAuthentication, )
+    authentication_classes = (BasicAuthentication, JWTAuthentication)
+
+    @action(methods=('get',), detail=False)
+    def me(self, request):
+        """"""
+        serializer = CustomUserSerializer(instance=request.user)
+        return Response(
+            status=HTTPStatus.OK,
+            data=serializer.data
+        )
 
 
 class BeltViewSet(viewsets.ModelViewSet):
