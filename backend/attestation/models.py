@@ -534,7 +534,7 @@ class PhysicalAttestation(models.Model):
     def __str__(self):
         return (
             f'{self.participant} ('
-            f'{self.complex} {self.points}'
+            f'{self.test} {self.points}'
         )
 
 
