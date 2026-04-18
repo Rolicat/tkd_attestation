@@ -4,11 +4,13 @@ import os
 import zipfile
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
+from rest_framework.authentication import BasicAuthentication
 
 from attestation.models import (
     Belt, Participant, Group, Option,
@@ -35,10 +37,17 @@ from api.serializers import (
     AdditionalTestDemandSerializer, PhysicalTestDemandSerializer,
     PhysicalTestPointSerializer, PhysicalAttestationSerializer,
     DemandsByGroupAndTestSerializer, AdditionalAttestationSerializer,
-    AttestationInfoSerializer, AgePeriodSerializer
+    AttestationInfoSerializer, AgePeriodSerializer, CustomUserSerializer
 )
 
 from api.helpers import calc_attestation_points
+
+
+class CustomUserViewSet(viewsets.ModelViewSet):
+    queryset = get_user_model().objects.all()
+    serializer_class = CustomUserSerializer
+    permission_classes = (AllowAny, )
+    authentication_classes = (BasicAuthentication, )
 
 
 class BeltViewSet(viewsets.ModelViewSet):

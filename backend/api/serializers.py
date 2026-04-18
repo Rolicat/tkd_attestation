@@ -10,6 +10,29 @@ from attestation.models import (
     AttestationInfo, AgePeriod
 )
 
+from users.models import User
+
+
+class CustomUserSerializer(serializers.ModelSerializer):
+    """ Сериализатор модели пользователей. """
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            password=validated_data['password'],
+        )
+        if len(User.objects.all()) == 1:
+            option = Option.objects.filter(
+                name='who_finished_attestation'
+            ).first()
+            if option:
+                option.value = user.pk
+                option.save()
+        return user
+
+    class Meta:
+        model = User
+        fields = '__all__'
+
 
 class BeltSerializer(serializers.ModelSerializer):
     """ Сериализатор справочника поясов. """

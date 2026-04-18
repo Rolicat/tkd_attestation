@@ -17,7 +17,7 @@ DEBUG = True if os.getenv('DEBUG', 'false').lower() == 'true' else False
 
 USE_SQL = True if os.getenv('USE_SQL', 'false').lower() == 'true' else False
 
-HOSTS = os.getenv('HOSTS', [])
+HOSTS = os.getenv('HOSTS', '')
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
