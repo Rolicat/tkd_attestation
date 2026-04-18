@@ -26,6 +26,9 @@ const AttestationsGroupPage = () => {
     const [group, setGroup] = useState({});
     const navigate = useNavigate();
 
+    const complexGroupName = complexesGroups.find(el => el.id == selectedComplexGroup);
+    const complexName = complexes.find(el => el.id == selectedComplex);
+
     useEffect(() => {
         getParticipantGroupAPI(groupId).then(data => data.success && setGroup(data.result[0]));
     }, [groupId]);
@@ -146,6 +149,16 @@ const AttestationsGroupPage = () => {
                 <SelectInput label='Комплекс' value={selectedComplex} options={complexes} onChange={(value) => {setSelectedComplex(value); changeAttestationInfo(selectedComplexGroup, value);}}/>
               </div>
               <IconButton icon={forward_icon} onClick={() => changeCurrentComplex(1)} />
+            </div>
+          }
+          {whoFinish != profile?.id &&
+            <div className={styles['row']}>
+              <div className={styles['submenu']}>
+                Группа комплекса: {complexGroupName?.name}
+              </div>
+              <div className={styles['submenu']}>
+                Комплекс: {complexName?.name}
+              </div>
             </div>
           }
           <div className={styles['submenu']}>
