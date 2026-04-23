@@ -6,10 +6,10 @@ import SubmitButton from '../../component/button/SubmitButton/SubmitButton';
 import IconButton from '../../component/button/IconButton/IconButton';
 import backward_icon from '/backward.png';
 import forward_icon from '/forward.png';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import SelectInput from '../../component/input/SelectInput/SelectInput';
 import AttestationsParticipant from './AttestationsParticipant';
-import { completeGroupAPI, getComplexGroupAPI, getOptionsAPI,
+import { completeGroupAPI, getComplexGroupsByGroupAPI, getOptionsAPI,
   getParticipantGroupAPI, getProfileAPI, getComplexesInGroupAPI,
   getAdditionalInfoAPI, setAdditionalInfoAPI } from '../../api/api';
 
@@ -28,25 +28,44 @@ const AttestationsGroupPage = () => {
 
     const complexGroupName = complexesGroups.find(el => el.id == selectedComplexGroup);
     const complexName = complexes.find(el => el.id == selectedComplex);
+    const isRuler = whoFinish == profile?.id;
+
+    const changeAttestationInfo = useCallback((complex_group, complex) => {
+        setAdditionalInfoAPI(groupId, complex_group, complex);
+    }, [groupId]);
 
     useEffect(() => {
         getParticipantGroupAPI(groupId).then(data => data.success && setGroup(data.result[0]));
     }, [groupId]);
 
     useEffect(() => {
-        getComplexGroupAPI().then(data => {
-            if (data.success && data.result.length) {
-                setComplexesGroups(data.result);
-                setSelectedComplexGroup(data.result[0].id);
+        getComplexGroupsByGroupAPI(groupId).then(complexData => {
+            if (complexData.success && complexData.result.length) {
+                setComplexesGroups(complexData.result);
+                getAdditionalInfoAPI(groupId).then(data => {
+                    if (data.success) {
+                        setSelectedComplexGroup(data.result.complex_group);
+                        setSelectedComplex(data.result.complex);
+                    }
+                    else {
+                        setSelectedComplexGroup(complexData.result[0].id);
+                    }
+                });
             }
         });
-    }, []);
+        const intervalId = setInterval(() => {
+            getAdditionalInfoAPI(groupId).then(data => {
+                if (data.success) {
+                    setSelectedComplexGroup(data.result.complex_group);
+                    setSelectedComplex(data.result.complex);
+                }
+            });
+        }, 5000);
+        return () => clearInterval(intervalId);
+    }, [groupId]);
 
     useEffect(() => {
         getProfileAPI().then(data => data.success && setProfile(data.result));
-    }, []);
-
-    useEffect(() => {
         getOptionsAPI().then(data => data.success && 
             data.result.forEach(option => {
                 if (option.name == 'participants_in_row') {
@@ -65,27 +84,15 @@ const AttestationsGroupPage = () => {
         getComplexesInGroupAPI(selectedComplexGroup, groupId).then(data => {
             if (data.success) {
                 setComplexes(data.result);
+                if (data.result.length) {
+                    setSelectedComplex(data.result[0].id);
+                    if (isRuler) {
+                        changeAttestationInfo(selectedComplexGroup, data.result[0].id);
+                    }
+                }
             }
         });
-    }, [selectedComplexGroup, groupId]);
-
-    useEffect(() => {
-        getAdditionalInfoAPI(groupId).then(data => {
-              if (data.success) {
-                  setSelectedComplexGroup(data.result.complex_group);
-                  setSelectedComplex(data.result.complex);
-              }
-          });
-        const intervalId = setInterval(() => {
-            getAdditionalInfoAPI(groupId).then(data => {
-                if (data.success) {
-                    setSelectedComplexGroup(data.result.complex_group);
-                    setSelectedComplex(data.result.complex);
-                }
-            });
-        }, 5000);
-        return () => clearInterval(intervalId);
-    }, [groupId, selectedComplexGroup, selectedComplex]);
+    }, [selectedComplexGroup, groupId, changeAttestationInfo, isRuler]);
 
     const completeAttestation = () => {
         completeGroupAPI(groupId).then(data => {
@@ -93,10 +100,6 @@ const AttestationsGroupPage = () => {
                 return navigate('/attestations/');
             }
         });
-    };
-
-    const changeAttestationInfo = (complex_group, complex) => {
-        setAdditionalInfoAPI(groupId, complex_group, complex);
     };
 
     const changeCurrentGroupComplex = (step) => {
@@ -151,7 +154,7 @@ const AttestationsGroupPage = () => {
               <IconButton icon={forward_icon} onClick={() => changeCurrentComplex(1)} />
             </div>
           }
-          {whoFinish != profile?.id &&
+          {!isRuler &&
             <div className={styles['row']}>
               <div className={styles['submenu']}>
                 Группа комплекса: {complexGroupName?.name}

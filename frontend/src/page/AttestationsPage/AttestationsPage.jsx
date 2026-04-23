@@ -3,9 +3,10 @@ import BackwardButton from '../../component/button/BackwardButton/BackwardButton
 import styles from './AttestationsPage.module.css';
 import cn from 'classnames';
 import AttestationsRow from './AttestationsRow';
-import { getGroupsAPI, getResultsAPI, getOptionsAPI, getProfileAPI } from '../../api/api';
+import { getGroupsAPI, getResultsAPI, getOptionsAPI, getProfileAPI, restartGroupsAPI } from '../../api/api';
 import IconButton from '../../component/button/IconButton/IconButton';
 import close_icon from '/close.png';
+import refresh_icon from '/refresh.png';
 
 
 const AttestationsPage = () => {
@@ -40,6 +41,12 @@ const AttestationsPage = () => {
         getResultsAPI(group_id).then(data => data.success && setGroupResults(data.result));
     };
 
+    const restartGroups = () => {
+        if (confirm('ВНИМАНИЕ!!! Будут перезапущены все подгруппы. Продолжить?')) {
+            restartGroupsAPI();
+        }
+    };
+
     const isRuler = whoFinish == profile.id;
 
     return (
@@ -62,7 +69,10 @@ const AttestationsPage = () => {
         }
         <div className={cn('container_column', styles['align_top'])}>
           <div className={cn('font24', styles['header'])}>
-            Аттестация
+            <div className={styles['row']}>
+              Аттестация
+              {isRuler && <IconButton icon={refresh_icon} onClick={restartGroups}/>}
+            </div>
           </div>
           <div className={styles['row']}>
             <div className={styles['width200']}></div>

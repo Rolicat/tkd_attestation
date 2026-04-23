@@ -354,6 +354,29 @@ class ComplexGroupViewSet(viewsets.ModelViewSet):
     queryset = ComplexGroup.objects.all().order_by('id')
     serializer_class = ComplexGroupSerializer
 
+    @action(methods=('post', ), detail=False)
+    def complex_groups_by_group(self, request):
+        """ Получить группы комплексов по требованиям подгуппы. """
+        group_id = request.data.get('group_id', None)
+        if group_id is None:
+            return Response(
+                status=HTTPStatus.BAD_REQUEST
+            )
+        group = Group.objects.get(pk=group_id)
+        belt = group.belt_attestation
+        belt_demands = BeltDemand.objects.filter(
+            belt=belt
+        ).all()
+        complex_groups = []
+        for row in belt_demands:
+            if row.complex.complex_group not in complex_groups:
+                complex_groups.append(row.complex.complex_group)
+        serializer = ComplexGroupSerializer(instance=complex_groups, many=True)
+        return Response(
+            status=HTTPStatus.OK,
+            data=serializer.data
+        )
+
     @action(methods=('post',), detail=False)
     def complexes(self, request):
         """ Получить комплексы группы. """
@@ -747,9 +770,31 @@ class AttestationViewSet(viewsets.ModelViewSet):
             AdditionalAttestation.objects.filter(
                 participant=pg.participant
             ).delete()
+        AttestationInfo.objects.filter(group=group_id).delete()
         group = Group.objects.get(pk=group_id)
         group.status = 'Ожидание'
         group.save()
+        return Response(
+            status=HTTPStatus.OK
+        )
+
+    @action(methods=('get', ), detail=False)
+    def restart_all_attestation(self, request):
+        """ Перезапуск аттестации всех подгрупп. """
+        pgs = ParticipantGroup.objects.filter().all()
+        for pg in pgs:
+            Attestation.objects.filter(participant=pg.participant).delete()
+            PhysicalAttestation.objects.filter(
+                participant=pg.participant
+            ).delete()
+            AdditionalAttestation.objects.filter(
+                participant=pg.participant
+            ).delete()
+        groups = Group.objects.all()
+        AttestationInfo.objects.all().delete()
+        for group in groups:
+            group.status = 'Ожидание'
+            group.save()
         return Response(
             status=HTTPStatus.OK
         )

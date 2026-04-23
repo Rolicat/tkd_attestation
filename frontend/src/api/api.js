@@ -165,6 +165,15 @@ export async function getComplexGroupAPI() {
 }
 
 
+export async function getComplexGroupsByGroupAPI(group_id) {
+    const data = await postAPI(
+        'api/complex_groups/complex_groups_by_group/',
+        {'group_id': group_id}
+    );
+    return data;
+}
+
+
 export async function postComplexAPI(group_id) {
     const data = await postAPI(
         'api/complexes/',
@@ -347,6 +356,14 @@ export async function restartGroupAPI(group_id) {
     const data = await postAPI(
         'api/attestations/restart_attestation/',
         {group_id: group_id}
+    );
+    return data;
+}
+
+
+export async function restartGroupsAPI() {
+    const data = await getAPI(
+        'api/attestations/restart_all_attestation/'
     );
     return data;
 }

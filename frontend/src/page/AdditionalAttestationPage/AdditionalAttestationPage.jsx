@@ -37,11 +37,14 @@ const AdditionalAttestationPage = () => {
                 if (data.result.length) {
                     const test_id = data.result[0].id;
                     setSelectedAdditionalTest(test_id);
-                    getAdditionalTestCriteriasByTestAPI(test_id, groupId).then(data => data.success && setCriterias(data.result));
                 }
             }
         });
     }, [groupId]);
+
+    useEffect(() => {
+        getAdditionalTestCriteriasByTestAPI(selectedAdditionalTest, groupId).then(data => data.success && setCriterias(data.result));
+    }, [selectedAdditionalTest, groupId]);
 
     return (
       <div className={cn('container_column', styles['align_top'])}>

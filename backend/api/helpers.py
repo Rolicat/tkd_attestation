@@ -98,10 +98,10 @@ def calc_average_points(group_id: str) -> list[dict[int, str]]:
     physical_complexes_demands = PhysicalTestDemand.objects.filter(
         belt=group.belt_attestation
     ).all()
-    tests = [p_c_d.test for p_c_d in physical_complexes_demands]
+    tests = set(p_c_d.test for p_c_d in physical_complexes_demands)
     common_points = {}
     for attestation in physical_attestations:
-        id = attestation.participant.id
+        id = attestation.participant.pk
         calced_points = calc_physical_points(
             points=attestation.points,
             test=attestation.test,
@@ -248,8 +248,8 @@ def calc_physical_points(
         return 0
     points_percent = round(min(points, max_points) * 100 / max_points, 2)
     test_points = PhysicalTestPoint.objects.filter(
-        percent__gte=points_percent
-    ).order_by('percent').first()
+        percent__lte=points_percent
+    ).order_by('-percent').first()
     if test_points is None:
         return 0
     return test_points.points

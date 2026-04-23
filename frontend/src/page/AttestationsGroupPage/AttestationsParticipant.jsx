@@ -2,11 +2,14 @@ import { useEffect, useState } from 'react';
 import styles from './AttestationsGroupPage.module.css';
 import { getAttestationComplexesAPI, postAttestationComplexAPI } from '../../api/api';
 import SubmitButton from '../../component/button/SubmitButton/SubmitButton';
+import { useRef } from 'react';
 
 
 const AttestationsParticipant = ({ participant, complex, groupId }) => {
     const [scoreTable, setScoreTable] = useState({});
     const judgePoints = [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
+    const divScoreRef = useRef(null);
+
 
     useEffect(() => {
       if (!complex) {
@@ -54,10 +57,10 @@ const AttestationsParticipant = ({ participant, complex, groupId }) => {
     };
 
     return (
-      <div className={styles['participant']} >
+      <div className={styles['participant']} onMouseEnter={() => divScoreRef.current.focus()}>
         {participant.name}
         {complex &&
-          <div className={styles['participant_score']} onMouseEnter={(e) => e.target.focus()} tabIndex={0} onKeyDown={handleKeyDown}>
+          <div id="participant_score" className={styles['participant_score']} ref={divScoreRef} tabIndex={0} onKeyDown={handleKeyDown}>
             <div className={styles['participant_score_row']}>
               {scoreTable.name}
               <input className={styles['score']} type="number" min='0' max={scoreTable.max} step='0.5' value={scoreTable.points} onChange={
