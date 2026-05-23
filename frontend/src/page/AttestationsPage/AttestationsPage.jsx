@@ -5,8 +5,9 @@ import cn from 'classnames';
 import AttestationsRow from './AttestationsRow';
 import { getGroupsAPI, getResultsAPI, getOptionsAPI, getProfileAPI, restartGroupsAPI } from '../../api/api';
 import IconButton from '../../component/button/IconButton/IconButton';
-import close_icon from '/close.png';
+import IconButtonNoBG from '../../component/button/IconButtonNoBG/IconButtonNoBG';
 import refresh_icon from '/refresh.png';
+import GroupResultWidget from '../../component/widget/GroupResultWidget/GroupResultWidget';
 
 
 const AttestationsPage = () => {
@@ -54,19 +55,7 @@ const AttestationsPage = () => {
         <div className={cn('header_menu')}>
           <BackwardButton label='Назад' to='/' />
         </div>
-        {groupResultVisible &&
-          <div className={styles['result_container']}>
-            <div className={styles['result_close']}>
-              <IconButton icon={close_icon} onClick={() => setGroupResultVisible(false)}/>
-            </div>
-            {groupResults.map(el => <div key={el.id} >
-                <b>{el.value}</b>
-                {el.complexes.map(complex => <div key={complex.name}>{complex.name} - {complex.point}</div>
-                )}
-              </div>)
-            }
-          </div>
-        }
+        {groupResultVisible && <GroupResultWidget groupResults={groupResults} setVisible={setGroupResultVisible}/>}
         <div className={cn('container_column', styles['align_top'])}>
           <div className={cn('font24', styles['header'])}>
             <div className={styles['row']}>

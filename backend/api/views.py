@@ -819,6 +819,9 @@ class AttestationViewSet(viewsets.ModelViewSet):
         """ Возвращает результаты подгруппы. """
         group_id = request.GET.get('group_id', None)
         option = Option.objects.filter(name='points_calc').first()
+        if option is None:
+            option = Option()
+            option.value = '0'
         if group_id is None or option is None:
             return Response(
                 status=HTTPStatus.BAD_REQUEST

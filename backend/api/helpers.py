@@ -164,11 +164,24 @@ def calc_average_points(group_id: str) -> list[dict[int, str]]:
                 }],
             }
     for id, info in results.items():
+        complex_count = 0
+        points_count = 0
+        for complex in info['complexes']:
+            points_count += complex['point']
+            complex_count += 1
+        points_common = (
+            complex_count
+            and
+            round(points_count / complex_count, 1)
+            or
+            0
+        )
         data.append(
             {
                 'id': id,
                 'value': info['name'],
-                'complexes': info['complexes']
+                'complexes': info['complexes'],
+                'points': points_common
             }
         )
     return data

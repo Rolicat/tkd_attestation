@@ -214,6 +214,7 @@ class AttestationResultSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     value = serializers.CharField()
     complexes = ComplexGroupPointsSerializer(many=True)
+    points = serializers.FloatField()
 
 
 class PhysicalTestSerializer(serializers.ModelSerializer):
